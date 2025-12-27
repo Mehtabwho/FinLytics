@@ -1,0 +1,3 @@
+// Compatibility shim: re-export the axios instance from ../api/axios
+import api from '../api/axios';
+export default api;

@@ -84,22 +84,103 @@ const classifyExpense = async (description) => {
   Determine if it is generally tax-deductible in Bangladesh for a business.
   Return JSON: { "category": "string", "isDeductible": boolean }`;
   
-  return await generateJSON(prompt);
+  // Try AI classification first
+  const aiResult = await generateJSON(prompt);
+  if (aiResult) return aiResult;
+
+  // Fallback heuristic classification when AI fails
+  try {
+    const lower = (description || '').toLowerCase();
+    let category = 'Other';
+    if (/salary|payroll|wage/.test(lower)) category = 'Salary';
+    else if (/rent/.test(lower)) category = 'Rent';
+    else if (/transport|taxi|bus|uber|travel/.test(lower)) category = 'Transport';
+    else if (/bill|electric|water|utility|utilities/.test(lower)) category = 'Utilities';
+    else if (/ad\b|advert|ads|marketing|promotion/.test(lower)) category = 'Marketing';
+    else if (/purchase|tools|inventory|stock|suppl|buying/.test(lower)) category = 'Inventory';
+    else if (/chair|table|desk|furnitur|computer|laptop|printer|equipment/.test(lower)) category = 'Equipment';
+    else if (/maintenance|repair|service/.test(lower)) category = 'Maintenance';
+    else if (/legal|lawyer|court/.test(lower)) category = 'Legal';
+
+    // Most business expenses are generally deductible; mark false for certain categories if desired
+    const isDeductible = category !== 'Legal' ? true : true;
+    return { category, isDeductible };
+  } catch (err) {
+    console.error('Fallback classifyExpense failed:', err.message);
+    return null;
+  }
 };
 
 const parseNaturalLanguage = async (text) => {
-    const prompt = `Parse this financial statement: "${text}".
-    Identify if it is an income or expense.
-    Extract amount, source (for income) or category (for expense), and date (default to today if not specified).
-    Return JSON: { 
-        "type": "income" | "expense", 
-        "amount": number, 
-        "source": "string (if income)", 
-        "category": "string (if expense)",
-        "description": "string", 
-        "date": "YYYY-MM-DD" 
-    }`;
-    return await generateJSON(prompt);
+  const prompt = `Parse this financial statement: "${text}".
+  Identify whether the statement describes an "income" (money received) or an "expense" (money paid out).
+  Rules:
+  - Treat verbs like "paid", "paid to", "paid for", "gave" as expense.
+  - Treat verbs like "received", "got", "earned", "invoice" (when received) as income.
+  - If the text is ambiguous, prefer the most likely interpretation given the verb used (e.g., "paid salary" => expense).
+  - Extract the numeric amount (strip currency symbols) as a number.
+  - Extract a short description string.
+  - Extract a category for expenses (e.g., Salary, Rent, Utilities, Inventory, Transport, Misc) when possible.
+  - If no date is present, set date to today's date in YYYY-MM-DD.
+    Return ONLY a valid JSON object or a JSON array (if multiple items are described) — no markdown, no explanation.
+    If the text contains multiple expenses/incomes (for example comma-separated or joined by "and"), return a JSON array of objects, one per item.
+    Example responses:
+    For single: "paid salary 20000": {"type":"expense","amount":20000,"category":"Salary","description":"paid salary","date":"2025-12-28"}
+    For multiple: "salary 2000, bill 1500, transportation 1000": [
+      {"type":"expense","amount":2000,"category":"Salary","description":"salary 2000","date":"2025-12-28"},
+      {"type":"expense","amount":1500,"category":"Utilities","description":"bill 1500","date":"2025-12-28"},
+      {"type":"expense","amount":1000,"category":"Transport","description":"transportation 1000","date":"2025-12-28"}
+    ]
+    Always follow the schema exactly:
+    { "type": "income" | "expense", "amount": number, "source": "string (if income)", "category": "string (if expense)", "description": "string", "date": "YYYY-MM-DD" }
+  `;
+    // First try AI-generated JSON
+    const aiResult = await generateJSON(prompt);
+    if (aiResult) return aiResult;
+
+    // Fallback: basic heuristic parsing when AI fails to return valid JSON
+    try {
+      const lower = text.toLowerCase();
+      // Split possible multiple items by commas, newlines, or ' and '
+      const parts = text.split(/,|\band\b|\n/).map(p => p.trim()).filter(Boolean);
+      const expenseKeywords = /\b(paid|paid to|paid for|spent|gave|purchase|purchased)\b/i;
+      const incomeKeywords = /\b(received|got|earned|invoice from|paid by|income|revenue)\b/i;
+      const today = new Date();
+      const isoDate = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+      const parsedItems = parts.map(part => {
+        const amountMatch = part.match(/([0-9]{1,3}(?:[0-9,]*)(?:\.[0-9]+)?)/);
+        const amount = amountMatch ? Number(amountMatch[0].replace(/,/g, '')) : 0;
+        const pLower = part.toLowerCase();
+        let type = 'expense';
+        if (incomeKeywords.test(pLower) && !expenseKeywords.test(pLower)) type = 'income';
+
+          // Simple category guesses based on keywords (expanded)
+          let category = undefined;
+          if (/salary|payroll|wage/.test(pLower)) category = 'Salary';
+          else if (/rent/.test(pLower)) category = 'Rent';
+          else if (/transport|taxi|bus|uber|travel/.test(pLower)) category = 'Transport';
+          else if (/bill|electric|water|utility|utilities/.test(pLower)) category = 'Utilities';
+          else if (/ad\b|advert|ads|marketing|promotion/.test(pLower)) category = 'Marketing';
+          else if (/chair|table|desk|furnitur|computer|laptop|printer|equipment|buying/.test(pLower)) category = 'Equipment';
+          else if (/purchase|tools|inventory|stock|suppl/.test(pLower)) category = 'Inventory';
+          else category = 'Uncategorized';
+
+        return {
+          type,
+          amount,
+          source: type === 'income' ? part : undefined,
+          category: type === 'expense' ? category : undefined,
+          description: part,
+          date: isoDate
+        };
+      });
+
+      return parsedItems.length > 1 ? parsedItems : parsedItems[0];
+    } catch (err) {
+      console.error('Fallback parsing failed:', err.message);
+      return null;
+    }
 }
 
 const explainTax = async (taxData) => {

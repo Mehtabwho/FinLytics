@@ -133,26 +133,49 @@ const Reports = () => {
       doc.text(`Generated: ${new Date().toLocaleDateString()}`, margin, y);
       y += 20;
 
-      // Summary
+      // Summary - Using a better table layout for clarity
       doc.setFontSize(12);
-      const totalIncomeText = `Total Income: ৳${totalIncome.toLocaleString()}`;
-      const totalExpenseText = `Total Expense: ৳${totalExpense.toLocaleString()}`;
-      const netProfitText = `Net Profit: ৳${netProfit.toLocaleString()}`;
-
-      doc.text(totalIncomeText, margin, y);
-      doc.text(totalExpenseText, margin + 220, y);
-      doc.text(netProfitText, margin + 440, y);
-      y += 30;
+      doc.setFont(undefined, 'bold');
+      doc.text('Financial Summary', margin, y);
+      y += 20;
+      
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(11);
+      const summaryData = [
+        ['Total Income:', `${totalIncome.toLocaleString()} Taka`],
+        ['Total Expense:', `${totalExpense.toLocaleString()} Taka`],
+        ['Net Profit:', `${netProfit.toLocaleString()} Taka`]
+      ];
+      
+      doc.autoTable({
+        body: summaryData,
+        startY: y,
+        margin: { left: margin, right: margin },
+        styles: { fontSize: 11, cellPadding: 5 },
+        columnStyles: {
+          0: { cellWidth: 80, fontStyle: 'bold' },
+          1: { cellWidth: 100, halign: 'right' }
+        },
+        didDrawPage: function() {}
+      });
+      
+      y = doc.lastAutoTable.finalY + 20;
 
       // Prepare table rows
       const rows = [];
       financialData.income.forEach(i => {
-        rows.push(['Income', i.date.split('T')[0], `৳${i.amount.toLocaleString()}`, i.source || '-']);
+        rows.push(['Income', i.date.split('T')[0], `${i.amount.toLocaleString()} Taka`, i.source || '-']);
       });
       financialData.expenses.forEach(e => {
-        rows.push(['Expense', e.date.split('T')[0], `৳${e.amount.toLocaleString()}`, `${e.category || '-'} - ${e.description || '-'}`]);
+        rows.push(['Expense', e.date.split('T')[0], `${e.amount.toLocaleString()} Taka`, `${e.category || '-'} - ${e.description || '-'}`]);
       });
 
+      // Add a page break if needed and add detailed transactions table
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text('Detailed Transactions', margin, y);
+      y += 15;
+      
       // Auto-table for items
       doc.autoTable({
         head: [['Type', 'Date', 'Amount', 'Description']],

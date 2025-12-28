@@ -22,6 +22,8 @@ if (!OPENROUTER_API_KEY) {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'HTTP-Referer': 'http://localhost:5173',
+        'X-Title': 'FinLytics',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(body)

@@ -159,14 +159,13 @@ const Income = () => {
                 <div className="mb-6 flex justify-end">
                     <button 
                         onClick={() => setNaturalLanguageMode(!naturalLanguageMode)} 
-                        className={`text-sm flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
+                        className={`text-sm flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors font-medium ${
                             naturalLanguageMode 
-                                ? 'bg-indigo-100 text-indigo-700 font-medium' 
-                                : 'text-slate-500 hover:bg-slate-100'
+                                ? 'bg-indigo-100 text-indigo-700' 
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }`}
                     >
-                        <Mic size={16} /> 
-                        {naturalLanguageMode ? 'Switch to Manual Input' : 'Use AI Voice/Text Input'}
+                        {naturalLanguageMode ? 'Switch to Manual Input' : 'Use AI for Text Input'}
                     </button>
                 </div>
 

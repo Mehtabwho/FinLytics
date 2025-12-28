@@ -59,26 +59,61 @@ router.post('/', protect, async (req, res) => {
 router.post('/ai', protect, async (req, res) => {
     const { text } = req.body;
     try {
-        const parsed = await parseNaturalLanguage(text);
-        if (!parsed || parsed.type !== 'expense') {
-            return res.status(400).json({ message: 'Could not parse expense from text or text describes income.' });
-        }
-        
-        // Secondary classification for deductibility
-        const classification = await classifyExpense(parsed.description || text);
+    const parsed = await parseNaturalLanguage(text);
+
+    if (!parsed) {
+      return res.status(400).json({ message: 'Could not parse expense from text or text describes income.' });
+    }
+
+    // If parser returned an array, create multiple expenses
+    if (Array.isArray(parsed)) {
+      const created = [];
+      for (const item of parsed) {
+        if (!item || item.type !== 'expense') continue; // skip incomes or invalid items
+
+        const classification = await classifyExpense(item.description || text);
 
         const expense = new Expense({
-            user: req.user._id,
-            category: parsed.category || classification?.category || 'Uncategorized',
-            amount: parsed.amount,
-            date: parsed.date || new Date(),
-            description: parsed.description || text,
-            isDeductible: classification ? classification.isDeductible : true,
-            financialYear: req.user.currentFinancialYear,
+          user: req.user._id,
+          category: item.category || classification?.category || 'Uncategorized',
+          amount: item.amount,
+          date: item.date || new Date(),
+          description: item.description || text,
+          isDeductible: classification ? classification.isDeductible : true,
+          financialYear: req.user.currentFinancialYear,
         });
 
         const createdExpense = await expense.save();
-        res.status(201).json(createdExpense);
+        created.push(createdExpense);
+      }
+
+      if (created.length === 0) {
+        return res.status(400).json({ message: 'No expenses found in input.' });
+      }
+
+      return res.status(201).json(created);
+    }
+
+    // Single parsed object flow
+    if (parsed.type !== 'expense') {
+      return res.status(400).json({ message: 'Could not parse expense from text or text describes income.' });
+    }
+
+    // Secondary classification for deductibility
+    const classification = await classifyExpense(parsed.description || text);
+
+    const expense = new Expense({
+      user: req.user._id,
+      category: parsed.category || classification?.category || 'Uncategorized',
+      amount: parsed.amount,
+      date: parsed.date || new Date(),
+      description: parsed.description || text,
+      isDeductible: classification ? classification.isDeductible : true,
+      financialYear: req.user.currentFinancialYear,
+    });
+
+    const createdExpense = await expense.save();
+    res.status(201).json(createdExpense);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

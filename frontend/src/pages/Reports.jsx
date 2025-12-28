@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { Line, Pie } from 'react-chartjs-2';
 
@@ -117,6 +119,53 @@ const Reports = () => {
       link.click();
   };
 
+    const handleDownloadPDF = () => {
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+      const margin = 40;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      let y = 40;
+
+      doc.setFontSize(18);
+      doc.text(`FinLytics Annual Report - ${year}`, pageWidth / 2, y, { align: 'center' });
+      y += 30;
+
+      doc.setFontSize(12);
+      doc.text(`Generated: ${new Date().toLocaleDateString()}`, margin, y);
+      y += 20;
+
+      // Summary
+      doc.setFontSize(12);
+      const totalIncomeText = `Total Income: ৳${totalIncome.toLocaleString()}`;
+      const totalExpenseText = `Total Expense: ৳${totalExpense.toLocaleString()}`;
+      const netProfitText = `Net Profit: ৳${netProfit.toLocaleString()}`;
+
+      doc.text(totalIncomeText, margin, y);
+      doc.text(totalExpenseText, margin + 220, y);
+      doc.text(netProfitText, margin + 440, y);
+      y += 30;
+
+      // Prepare table rows
+      const rows = [];
+      financialData.income.forEach(i => {
+        rows.push(['Income', i.date.split('T')[0], `৳${i.amount.toLocaleString()}`, i.source || '-']);
+      });
+      financialData.expenses.forEach(e => {
+        rows.push(['Expense', e.date.split('T')[0], `৳${e.amount.toLocaleString()}`, `${e.category || '-'} - ${e.description || '-'}`]);
+      });
+
+      // Auto-table for items
+      doc.autoTable({
+        head: [['Type', 'Date', 'Amount', 'Description']],
+        body: rows,
+        startY: y,
+        margin: { left: margin, right: margin },
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [60, 60, 60] }
+      });
+
+      doc.save(`finlytics_report_${year}.pdf`);
+    };
+
   if (loading) return <div className="p-8 text-center text-slate-500">Generating Financial Reports...</div>;
 
   return (
@@ -133,10 +182,10 @@ const Reports = () => {
                 <option value="2024-2025">2024-2025</option>
              </select>
             <button 
-                onClick={handleDownload}
-                className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light flex items-center gap-2 text-sm"
+              onClick={handleDownloadPDF}
+              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light flex items-center gap-2 text-sm"
             >
-                <span>Download CSV</span>
+              <span>Download PDF</span>
             </button>
         </div>
       </div>

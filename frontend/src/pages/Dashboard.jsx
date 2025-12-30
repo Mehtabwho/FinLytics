@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
-import api from '../services/api'; // Correct import path
+import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
-import { DollarSign, TrendingUp, TrendingDown, Activity, Lightbulb, AlertCircle, Plus, MessageCircle } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Activity, Lightbulb, AlertCircle, Plus, MessageCircle, Zap } from 'lucide-react';
+import { Card, StatCard } from '../components/Card';
+import { SkeletonCard } from '../components/Skeleton';
+import { PageTransition, StaggerContainer } from '../components/Animations';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
@@ -59,15 +63,20 @@ const Dashboard = () => {
     fetchData();
   }, [year]);
 
-  if (loading) return (
-      <div className="flex h-64 items-center justify-center">
-          <div className="animate-pulse flex flex-col items-center">
-              <div className="h-12 w-12 bg-slate-200 rounded-full mb-4"></div>
-              <div className="h-4 w-48 bg-slate-200 rounded"></div>
-              <p className="mt-4 text-slate-500">Analyzing financial data...</p>
+  if (loading) {
+    return (
+      <PageTransition>
+        <div className="space-y-6">
+          <SkeletonCard />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
           </div>
-      </div>
-  );
+        </div>
+      </PageTransition>
+    );
+  }
 
   const chartData = {
     labels: ['Income', 'Expenses', 'Profit'],
@@ -94,169 +103,200 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-            <h1 className="text-3xl font-bold text-slate-900">Financial Dashboard</h1>
-            <p className="text-slate-500 text-sm mt-1">Fiscal Year {year}</p>
-        </div>
-        <select 
-          value={year} 
-          onChange={(e) => setYear(e.target.value)}
-          className="border border-slate-200 p-2.5 rounded-xl bg-white shadow-sm text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-        >
-          <option value="2024-2025">2024-2025</option>
-          <option value="2023-2024">2023-2024</option>
-        </select>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <button
-          onClick={() => navigate('/income')}
-          className="flex items-center justify-center gap-2 p-4 bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 border border-green-200 rounded-xl transition-all shadow-sm hover:shadow-md"
-        >
-          <Plus size={20} className="text-green-600" />
-          <span className="text-sm font-semibold text-green-700">Add Income</span>
-        </button>
-        <button
-          onClick={() => navigate('/expenses')}
-          className="flex items-center justify-center gap-2 p-4 bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 border border-red-200 rounded-xl transition-all shadow-sm hover:shadow-md"
-        >
-          <Plus size={20} className="text-red-600" />
-          <span className="text-sm font-semibold text-red-700">Add Expense</span>
-        </button>
-        <button
-          onClick={() => navigate('/tax')}
-          className="flex items-center justify-center gap-2 p-4 bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 border border-purple-200 rounded-xl transition-all shadow-sm hover:shadow-md"
-        >
-          <Activity size={20} className="text-purple-600" />
-          <span className="text-sm font-semibold text-purple-700">View Tax</span>
-        </button>
-        <button
-          onClick={() => navigate('/chat')}
-          className="flex items-center justify-center gap-2 p-4 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 border border-blue-200 rounded-xl transition-all shadow-sm hover:shadow-md"
-        >
-          <MessageCircle size={20} className="text-blue-600" />
-          <span className="text-sm font-semibold text-blue-700">Chat AI</span>
-        </button>
-      </div>
-      
-      {/* Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Income Card */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 transition-all hover:shadow-md">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-green-50 rounded-xl text-green-600">
-              <TrendingUp size={24} />
-            </div>
-            <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">+12%</span>
-          </div>
-          <p className="text-slate-500 text-sm font-medium">Total Income</p>
-          <h3 className="text-2xl font-bold text-primary mt-1">৳{summary.totalIncome.toLocaleString()}</h3>
-        </div>
-
-        {/* Expense Card */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 transition-all hover:shadow-md">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-red-50 rounded-xl text-red-500">
-              <TrendingDown size={24} />
-            </div>
-          </div>
-          <p className="text-slate-500 text-sm font-medium">Total Expenses</p>
-          <h3 className="text-2xl font-bold text-primary mt-1">৳{summary.totalExpense.toLocaleString()}</h3>
-        </div>
-
-        {/* Profit Card (Smart State) */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 transition-all hover:shadow-md">
-          <div className="flex items-center justify-between mb-4">
-            <div className={`p-3 rounded-xl ${summary.profit >= 0 ? 'bg-primary/10 text-primary' : 'bg-red-50 text-red-500'}`}>
-              <DollarSign size={24} />
-            </div>
-          </div>
-          <p className="text-slate-500 text-sm font-medium">Net Profit</p>
-          <h3 className={`text-2xl font-bold mt-1 ${summary.profit >= 0 ? 'text-primary' : 'text-red-500'}`}>
-            ৳{summary.profit.toLocaleString()}
-          </h3>
-        </div>
-
-        {/* Tax Card */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 transition-all hover:shadow-md">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-purple-50 rounded-xl text-purple-600">
-              <Activity size={24} />
-            </div>
-            <span className="text-xs text-slate-400">NBR Rules</span>
-          </div>
-          <p className="text-slate-500 text-sm font-medium">Estimated Tax</p>
-          <h3 className="text-2xl font-bold text-primary mt-1">৳{summary.estimatedTax.toLocaleString()}</h3>
-          <p className="text-xs text-slate-400 mt-2">Tax Free Limit: ৳{(summary.taxFreeLimit || 0).toLocaleString()}</p>
-        </div>
-      </div>
-
-      <div className="space-y-6">
-          {/* Chart Section */}
-          <div className="bg-white p-8 rounded-2xl shadow-md border border-slate-200">
-            <h3 className="text-xl font-bold text-slate-900 mb-8">Financial Overview</h3>
-            <div className="h-80">
-                {summary.totalIncome === 0 && summary.totalExpense === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
-                        <AlertCircle size={40} className="mb-3 opacity-40"/>
-                        <p className="text-base font-medium">No financial data available</p>
-                        <p className="text-sm mt-1">Add income and expenses to see charts</p>
-                    </div>
-                ) : (
-                    <Bar data={chartData} options={chartOptions} />
-                )}
-            </div>
-          </div>
-
-          {/* AI Insights Section */}
-          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-8 rounded-2xl shadow-lg relative overflow-hidden">
-            <div className="absolute -top-10 -right-10 opacity-5">
-                <Lightbulb size={200} strokeWidth={0.5} />
-            </div>
-            
-            <div className="flex items-center gap-3 mb-6 relative z-10">
-                <div className="p-3 bg-yellow-400/20 rounded-lg backdrop-blur-sm">
-                    <Lightbulb size={24} className="text-yellow-300" />
-                </div>
-                <h3 className="text-xl font-bold">AI Financial Advisor</h3>
-            </div>
-
-            <div className="space-y-4 relative z-10">
-                {insights ? (
-                    <div className="prose prose-invert prose-sm max-w-none">
-                         {/* Simple parsing to display text cleanly */}
-                        <p className="text-slate-200 text-sm leading-relaxed whitespace-pre-line">
-                            {insights.replace(/\*\*/g, '').replace(/###/g, '')}
-                        </p>
-                    </div>
-                ) : (
-                    <div className="text-slate-300 text-sm">
-                        {summary.totalIncome === 0 ? 
-                            <div>
-                              <p className="font-medium mb-2">Get Started with AI Insights</p>
-                              <p className="text-slate-400 text-xs">Add your income and expenses to receive personalized financial advice and tax-saving recommendations.</p>
-                            </div> :
-                            <div className="flex items-center gap-2">
-                              <div className="animate-pulse w-2 h-2 bg-yellow-300 rounded-full"></div>
-                              <p>Analyzing your financial data...</p>
-                            </div>
-                        }
-                    </div>
-                )}
-            </div>
-            
-            <button 
-              onClick={() => navigate('/chat')}
-              className="mt-6 w-full py-3 bg-yellow-400 hover:bg-yellow-300 text-slate-900 rounded-lg text-sm font-semibold transition-colors duration-200"
+    <PageTransition>
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+              Financial Dashboard
+            </h1>
+            <p className="text-slate-500 text-sm mt-2">Fiscal Year {year}</p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <select 
+              value={year} 
+              onChange={(e) => setYear(e.target.value)}
+              className="border border-slate-200 p-2.5 rounded-xl bg-white shadow-sm text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium"
             >
-                Chat with AI Assistant
-            </button>
+              <option value="2024-2025">FY 2024-2025</option>
+              <option value="2023-2024">FY 2023-2024</option>
+            </select>
+          </motion.div>
+        </div>
+
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-3"
+        >
+          {[
+            { label: 'Add Income', icon: Plus, color: 'bg-green-50 text-green-600 border-green-200', path: '/income' },
+            { label: 'Add Expense', icon: Plus, color: 'bg-red-50 text-red-600 border-red-200', path: '/expenses' },
+            { label: 'View Tax', icon: Activity, color: 'bg-purple-50 text-purple-600 border-purple-200', path: '/tax' },
+            { label: 'Chat AI', icon: MessageCircle, color: 'bg-blue-50 text-blue-600 border-blue-200', path: '/chat' },
+          ].map((action, idx) => {
+            const Icon = action.icon;
+            return (
+              <motion.button
+                key={idx}
+                whileHover={{ y: -4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate(action.path)}
+                className={`flex items-center justify-center gap-2 p-4 ${action.color} border rounded-xl transition-all shadow-sm hover:shadow-md group`}
+              >
+                <Icon size={20} className="group-hover:rotate-12 transition-transform" />
+                <span className="text-sm font-semibold">{action.label}</span>
+              </motion.button>
+            );
+          })}
+        </motion.div>
+
+        {/* Key Metrics */}
+        <StaggerContainer delay={0.08}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+              <StatCard
+                label="Total Income"
+                value={`৳${summary.totalIncome.toLocaleString()}`}
+                icon={TrendingUp}
+                color="secondary"
+              />
+            </motion.div>
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+              <StatCard
+                label="Total Expenses"
+                value={`৳${summary.totalExpense.toLocaleString()}`}
+                icon={TrendingDown}
+                color="red"
+              />
+            </motion.div>
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+              <StatCard
+                label="Net Profit"
+                value={`৳${summary.profit.toLocaleString()}`}
+                icon={DollarSign}
+                color={summary.profit >= 0 ? 'secondary' : 'red'}
+              />
+            </motion.div>
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+              <StatCard
+                label="Estimated Tax"
+                value={`৳${summary.estimatedTax.toLocaleString()}`}
+                icon={Zap}
+                color="amber"
+              />
+            </motion.div>
           </div>
+        </StaggerContainer>
+
+        {/* Charts Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+        >
+          {/* Bar Chart */}
+          <Card className="lg:col-span-2 p-6" hover={false}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-slate-900">Financial Overview</h3>
+              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                <Activity size={20} className="text-blue-600" />
+              </div>
+            </div>
+            <div className="h-80">
+              {summary.totalIncome === 0 && summary.totalExpense === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
+                  <AlertCircle size={40} className="mb-3 opacity-40"/>
+                  <p className="text-base font-medium">No financial data available</p>
+                  <p className="text-sm mt-1">Add income and expenses to see charts</p>
+                </div>
+              ) : (
+                <Bar data={chartData} options={chartOptions} />
+              )}
+            </div>
+          </Card>
+
+          {/* Summary Card */}
+          <Card className="p-6" hover={false}>
+            <h3 className="text-lg font-semibold text-slate-900 mb-6">Period Summary</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <span className="text-sm text-slate-600">Income</span>
+                <span className="font-semibold text-green-600">+৳{(summary.totalIncome / 1000000).toFixed(1)}M</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                <span className="text-sm text-slate-600">Expenses</span>
+                <span className="font-semibold text-red-600">-৳{(summary.totalExpense / 1000000).toFixed(1)}M</span>
+              </div>
+              <div className="border-t pt-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-slate-600">Profit Margin</span>
+                  <span className="text-lg font-bold text-slate-900">
+                    {summary.totalIncome > 0
+                      ? ((summary.profit / summary.totalIncome) * 100).toFixed(1)
+                      : '0'}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* AI Insights */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.4 }}
+        >
+          <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-8 border-0" hover={false}>
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-amber-400/20 rounded-xl flex items-center justify-center flex-shrink-0 backdrop-blur">
+                <Lightbulb size={24} className="text-amber-300" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold mb-3">AI Financial Advisor</h3>
+                {insights ? (
+                  <p className="text-slate-200 text-sm leading-relaxed">
+                    {insights.replace(/\*\*/g, '').replace(/###/g, '')}
+                  </p>
+                ) : (
+                  <div className="text-slate-300 text-sm">
+                    {summary.totalIncome === 0 ? 
+                      <div>
+                        <p className="font-medium mb-2">Get Started with AI Insights</p>
+                        <p className="text-slate-400 text-xs">Add your income and expenses to receive personalized financial advice and tax-saving recommendations.</p>
+                      </div> :
+                      <div className="flex items-center gap-2">
+                        <div className="animate-pulse w-2 h-2 bg-amber-300 rounded-full"></div>
+                        <p>Analyzing your financial data...</p>
+                      </div>
+                    }
+                  </div>
+                )}
+                <button 
+                  onClick={() => navigate('/chat')}
+                  className="mt-4 px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-lg text-sm font-semibold transition-colors"
+                >
+                  Chat with AI
+                </button>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
       </div>
-    </div>
+    </PageTransition>
   );
 };
 

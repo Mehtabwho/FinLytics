@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import api from '../services/api';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { Line, Pie } from 'react-chartjs-2';
+import { FileText, Download, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
+import { PageTransition, StaggerContainer } from '../components/Animations';
+import { Card } from '../components/Card';
+import { SkeletonCard } from '../components/Skeleton';
+import Button from '../components/Button';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
 
@@ -189,70 +195,150 @@ const Reports = () => {
       doc.save(`finlytics_report_${year}.pdf`);
     };
 
-  if (loading) return <div className="p-8 text-center text-slate-500">Generating Financial Reports...</div>;
+  if (loading) return (
+    <PageTransition>
+      <div className="space-y-6">
+        <SkeletonCard />
+        <div className="grid grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => <SkeletonCard key={i} />)}
+        </div>
+        <div className="grid grid-cols-2 gap-6">
+          {[...Array(2)].map((_, i) => <SkeletonCard key={i} height="h-96" />)}
+        </div>
+      </div>
+    </PageTransition>
+  );
 
   return (
+    <PageTransition>
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-primary">Annual Financial Report</h1>
-        <div className="flex space-x-3">
-             <select 
-                value={year} 
-                onChange={(e) => setYear(e.target.value)}
-                className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
-             >
-                <option value="2023-2024">2023-2024</option>
-                <option value="2024-2025">2024-2025</option>
-             </select>
-            <button 
-              onClick={handleDownloadPDF}
-              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light flex items-center gap-2 text-sm"
-            >
-              <span>Download PDF</span>
-            </button>
+      {/* Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex justify-between items-center"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-gradient-to-br from-primary to-primary-light rounded-xl shadow-lg">
+            <FileText className="text-white" size={24} />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
+              Annual Reports
+            </h1>
+            <p className="text-sm text-slate-500">Comprehensive financial overview & trends</p>
+          </div>
         </div>
-      </div>
+        <div className="flex items-center gap-3">
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <select 
+              value={year} 
+              onChange={(e) => setYear(e.target.value)}
+              className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all flex items-center gap-2"
+            >
+              <option value="2023-2024">2023-2024</option>
+              <option value="2024-2025">2024-2025</option>
+            </select>
+          </motion.div>
+          <Button variant="primary" onClick={handleDownloadPDF} className="flex items-center gap-2">
+            <Download size={16} />
+            <span>Download PDF</span>
+          </Button>
+        </div>
+      </motion.div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-            <p className="text-sm text-slate-500">Total Income</p>
-            <p className="text-2xl font-bold text-primary mt-1">৳{totalIncome.toLocaleString()}</p>
+      <StaggerContainer delay={0.06}>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+            <Card className="hover:shadow-lg transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600 font-medium">Total Income</p>
+                  <p className="text-3xl font-bold text-secondary mt-2">৳{totalIncome.toLocaleString()}</p>
+                </div>
+                <div className="p-3 bg-secondary/10 rounded-xl">
+                  <TrendingUp className="text-secondary" size={24} />
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+            <Card className="hover:shadow-lg transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600 font-medium">Total Expense</p>
+                  <p className="text-3xl font-bold text-red-500 mt-2">৳{totalExpense.toLocaleString()}</p>
+                </div>
+                <div className="p-3 bg-red-100 rounded-xl">
+                  <TrendingDown className="text-red-500" size={24} />
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+            <Card className="hover:shadow-lg transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600 font-medium">Net Profit</p>
+                  <p className={`text-3xl font-bold mt-2 ${netProfit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    ৳{netProfit.toLocaleString()}
+                  </p>
+                </div>
+                <div className={`p-3 rounded-xl ${netProfit >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                  {netProfit >= 0 ? <TrendingUp className="text-green-500" size={24} /> : <TrendingDown className="text-red-500" size={24} />}
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+            <Card className="hover:shadow-lg transition-shadow bg-gradient-to-br from-primary/5 to-secondary/5 border-secondary/20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600 font-medium">Estimated Tax</p>
+                  <p className="text-3xl font-bold text-primary mt-2">৳{(financialData.tax.taxPayable || 0).toLocaleString()}</p>
+                </div>
+                <div className="p-3 bg-primary/10 rounded-xl">
+                  <Calendar className="text-primary" size={24} />
+                </div>
+              </div>
+            </Card>
+          </motion.div>
         </div>
-        <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-            <p className="text-sm text-slate-500">Total Expense</p>
-            <p className="text-2xl font-bold text-red-500 mt-1">৳{totalExpense.toLocaleString()}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-            <p className="text-sm text-slate-500">Net Profit</p>
-            <p className={`text-2xl font-bold mt-1 ${netProfit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                ৳{netProfit.toLocaleString()}
-            </p>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-            <p className="text-sm text-slate-500">Estimated Tax</p>
-            <p className="text-2xl font-bold text-slate-700 mt-1">৳{(financialData.tax.taxPayable || 0).toLocaleString()}</p>
-        </div>
-      </div>
+      </StaggerContainer>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Monthly Trend */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-            <h3 className="font-semibold text-slate-700 mb-4">Financial Trends (Jul - Jun)</h3>
-            <div className="h-64">
-                <Line options={{ maintainAspectRatio: false, responsive: true }} data={processMonthlyData()} />
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="lg:col-span-2">
+          <Card>
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="text-secondary" size={20} />
+              <h3 className="font-bold text-slate-800">Financial Trends (Jul - Jun)</h3>
             </div>
-        </div>
+            <div className="h-64">
+              <Line options={{ maintainAspectRatio: false, responsive: true }} data={processMonthlyData()} />
+            </div>
+          </Card>
+        </motion.div>
 
         {/* Expense Breakdown */}
-        <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-            <h3 className="font-semibold text-slate-700 mb-4">Expense Distribution</h3>
-            <div className="h-64 flex justify-center">
-                <Pie options={{ maintainAspectRatio: false, responsive: true }} data={processExpenseCategories()} />
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <Card>
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingDown className="text-red-500" size={20} />
+              <h3 className="font-bold text-slate-800">Expense Distribution</h3>
             </div>
-        </div>
+            <div className="h-64 flex justify-center">
+              <Pie options={{ maintainAspectRatio: false, responsive: true }} data={processExpenseCategories()} />
+            </div>
+          </Card>
+        </motion.div>
       </div>
     </div>
+    </PageTransition>
   );
 };
 

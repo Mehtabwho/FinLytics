@@ -20,6 +20,7 @@ const Layout = () => {
     { path: '/income', label: 'Income', icon: <TrendingUp size={20} /> },
     { path: '/expenses', label: 'Expenses', icon: <TrendingDown size={20} /> },
     { path: '/tax', label: 'Tax Manager', icon: <Calculator size={20} /> },
+    { path: '/tax-rebate', label: 'Tax Rebate', icon: <Calculator size={20} /> },
     { path: '/reports', label: 'Reports', icon: <BarChart3 size={20} /> },
     { path: '/chat', label: 'AI Assistant', icon: <MessageSquare size={20} /> },
   ];

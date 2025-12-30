@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
-import { FileText, Info, Calculator, ShieldCheck, AlertCircle, Download, RefreshCw } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { FileText, Info, Calculator, ShieldCheck, AlertCircle, Download, RefreshCw, TrendingUp } from 'lucide-react';
+import { Card } from '../components/Card';
+import { SkeletonCard } from '../components/Skeleton';
+import { PageTransition, StaggerContainer } from '../components/Animations';
+import Button from '../components/Button';
 
 const Tax = () => {
   const [taxData, setTaxData] = useState(null);
@@ -39,44 +44,73 @@ const Tax = () => {
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center h-96">
-        <div className="flex flex-col items-center gap-3">
-            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-slate-500 font-medium">Calculating Tax Liability...</p>
+    <PageTransition>
+      <div className="space-y-6">
+        <SkeletonCard />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
         </div>
-    </div>
+      </div>
+    </PageTransition>
   );
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-            <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                <ShieldCheck className="text-primary" /> Tax Manager
+    <PageTransition>
+      <div className="max-w-5xl mx-auto space-y-6">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4 }}
+          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+        >
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent flex items-center gap-3">
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <ShieldCheck className="text-primary" size={28} />
+              </div>
+              Tax Manager
             </h1>
-            <p className="text-slate-500 text-sm">Automated NBR-compliant tax calculation & insights</p>
-        </div>
-        <div className="flex gap-3">
-             <select 
+            <p className="text-slate-500 text-sm mt-2">Automated NBR-compliant tax calculation & insights</p>
+          </div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+            className="flex gap-3"
+          >
+            <div className="relative">
+              <select 
                 value={year} 
                 onChange={(e) => setYear(e.target.value)}
-                className="bg-white border border-slate-200 text-slate-700 py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm"
-            >
+                className="appearance-none bg-white border border-slate-200 text-slate-700 py-2.5 pl-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm font-medium"
+              >
                 <option value="2024-2025">FY 2024-2025</option>
                 <option value="2023-2024">FY 2023-2024</option>
-            </select>
-            <button onClick={fetchTaxData} className="p-2 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 shadow-sm" title="Refresh Calculation">
-                <RefreshCw size={20} />
-            </button>
-        </div>
-      </div>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                <Calculator size={16} />
+              </div>
+            </div>
+            <Button
+              onClick={fetchTaxData}
+              variant="secondary"
+              className="flex items-center gap-2"
+            >
+              <RefreshCw size={18} />
+              <span>Recalculate</span>
+            </Button>
+          </motion.div>
+        </motion.div>
 
-      {taxData && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {taxData && (
+          <StaggerContainer delay={0.08}>
             {/* Left Column: Summary & Breakdown */}
-            <div className="lg:col-span-2 space-y-6">
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="lg:col-span-2 space-y-6">
                 {/* Main Summary Card */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
+                <Card className="relative overflow-hidden p-6" hover={false}>
                     <div className="absolute top-0 right-0 p-6 opacity-5">
                         <Calculator size={120} />
                     </div>
@@ -114,10 +148,10 @@ const Tax = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </Card>
 
                 {/* Breakdown Table */}
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <Card className="overflow-hidden" hover={false}>
                     <div className="p-5 border-b border-slate-100 bg-slate-50/50">
                         <h3 className="font-semibold text-slate-800 flex items-center gap-2">
                             <FileText size={18} className="text-slate-400" /> 
@@ -158,12 +192,12 @@ const Tax = () => {
                             </tfoot>
                         </table>
                     </div>
-                </div>
-            </div>
+                </Card>
+            </motion.div>
 
             {/* Right Column: AI Insights */}
-            <div className="space-y-6">
-                <div className="bg-gradient-to-br from-primary to-primary-light text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="space-y-6">
+                <Card className="bg-gradient-to-br from-primary to-primary-light text-white border-0 relative overflow-hidden" hover={false}>
                     <div className="absolute top-0 right-0 p-4 opacity-10">
                         <Info size={100} />
                     </div>
@@ -199,20 +233,21 @@ const Tax = () => {
                             </div>
                         )}
                     </div>
-                </div>
+                </Card>
 
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                <Card className="p-5" hover={false}>
                     <h4 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
                         <AlertCircle size={18} className="text-amber-500" /> Important Note
                     </h4>
                     <p className="text-sm text-slate-500 leading-relaxed">
                         This calculation is based on the Finance Act 2024. Please consult with a certified tax practitioner before filing your final return.
                     </p>
-                </div>
-            </div>
-        </div>
-      )}
-    </div>
+                </Card>
+            </motion.div>
+          </StaggerContainer>
+        )}
+      </div>
+    </PageTransition>
   );
 };
 

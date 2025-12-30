@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Lock, Briefcase, Building2, ArrowRight, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { StaggerContainer } from '../components/Animations';
+import Button from '../components/Button';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -94,129 +97,147 @@ const Register = () => {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-6 text-sm flex items-center gap-2 animate-fadeIn">
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-6 text-sm flex items-center gap-2 animate-fadeIn"
+            >
               <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
               {error}
-            </div>
+            </motion.div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-slate-700">Full Name</label>
+          <StaggerContainer delay={0.06}>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="space-y-1.5">
+                  <label className="block text-sm font-medium text-slate-700">Full Name</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <User className="h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+                    </div>
+                    <motion.input
+                      type="text"
+                      name="name"
+                      whileFocus={{ scale: 1.02 }}
+                      className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800 placeholder:text-slate-400"
+                      placeholder="John Doe"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </motion.div>
+
+                <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="space-y-1.5">
+                  <label className="block text-sm font-medium text-slate-700">Email Address</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+                    </div>
+                    <motion.input
+                      type="email"
+                      name="email"
+                      whileFocus={{ scale: 1.02 }}
+                      className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800 placeholder:text-slate-400"
+                      placeholder="name@company.com"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </motion.div>
+              </div>
+
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="space-y-1.5">
+                <label className="block text-sm font-medium text-slate-700">Password</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+                    <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
                   </div>
-                  <input
+                  <motion.input
+                    type="password"
+                    name="password"
+                    whileFocus={{ scale: 1.02 }}
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800 placeholder:text-slate-400"
+                    placeholder="Create a strong password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </motion.div>
+
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="space-y-1.5">
+                <label className="block text-sm font-medium text-slate-700">Business Type</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <Briefcase className="h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+                  </div>
+                  <motion.input
                     type="text"
-                    name="name"
+                    name="businessType"
+                    whileFocus={{ scale: 1.02 }}
                     className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800 placeholder:text-slate-400"
-                    placeholder="John Doe"
-                    value={formData.name}
+                    placeholder="e.g. Retail, Software, Manufacturing"
+                    value={formData.businessType}
                     onChange={handleChange}
                     required
                   />
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-slate-700">Email Address</label>
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="space-y-1.5">
+                <label className="block text-sm font-medium text-slate-700">Taxpayer Category</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+                    <Building2 className="h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
                   </div>
-                  <input
-                    type="email"
-                    name="email"
-                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800 placeholder:text-slate-400"
-                    placeholder="name@company.com"
-                    value={formData.email}
+                  <motion.select
+                    name="taxpayerCategory"
+                    whileFocus={{ scale: 1.02 }}
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800 appearance-none cursor-pointer"
+                    value={formData.taxpayerCategory}
                     onChange={handleChange}
-                    required
-                  />
+                  >
+                    <option value="general">General</option>
+                    <option value="female">Female</option>
+                    <option value="senior_citizen">Senior Citizen (65+)</option>
+                    <option value="freedom_fighter">Freedom Fighter</option>
+                    <option value="physically_challenged">Physically Challenged</option>
+                  </motion.select>
+                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                  </div>
                 </div>
-              </div>
-            </div>
+                <p className="text-xs text-slate-500 mt-1 ml-1">Used for calculating your tax-free income threshold.</p>
+              </motion.div>
 
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-slate-700">Password</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
-                </div>
-                <input
-                  type="password"
-                  name="password"
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800 placeholder:text-slate-400"
-                  placeholder="Create a strong password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-slate-700">Business Type</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Briefcase className="h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
-                </div>
-                <input
-                  type="text"
-                  name="businessType"
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800 placeholder:text-slate-400"
-                  placeholder="e.g. Retail, Software, Manufacturing"
-                  value={formData.businessType}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-slate-700">Taxpayer Category</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Building2 className="h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
-                </div>
-                <select
-                  name="taxpayerCategory"
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800 appearance-none cursor-pointer"
-                  value={formData.taxpayerCategory}
-                  onChange={handleChange}
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="mt-6">
+                <Button 
+                  type="submit" 
+                  disabled={isLoading}
+                  variant="primary"
+                  className="w-full flex items-center justify-center gap-2"
                 >
-                  <option value="general">General</option>
-                  <option value="female">Female</option>
-                  <option value="senior_citizen">Senior Citizen (65+)</option>
-                  <option value="freedom_fighter">Freedom Fighter</option>
-                  <option value="physically_challenged">Physically Challenged</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
-                   <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
-                </div>
-              </div>
-              <p className="text-xs text-slate-500 mt-1 ml-1">Used for calculating your tax-free income threshold.</p>
-            </div>
-
-            <button 
-              type="submit" 
-              disabled={isLoading}
-              className="w-full bg-primary text-white py-3.5 rounded-xl font-medium hover:bg-primary-dark focus:ring-4 focus:ring-primary/20 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mt-4"
-            >
-              {isLoading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Creating Account...
-                </>
-              ) : (
-                <>
-                  Create Account <ArrowRight size={18} />
-                </>
-              )}
-            </button>
-          </form>
+                  {isLoading ? (
+                    <>
+                      <motion.div 
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                        className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                      />
+                      Creating Account...
+                    </>
+                  ) : (
+                    <>
+                      Create Account <ArrowRight size={18} />
+                    </>
+                  )}
+                </Button>
+              </motion.div>
+            </form>
+          </StaggerContainer>
 
           <div className="mt-6 pt-6 border-t border-slate-100 text-center">
             <p className="text-slate-500 text-sm">

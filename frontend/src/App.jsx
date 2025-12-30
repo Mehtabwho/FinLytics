@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Income from './pages/Income';
 import Expenses from './pages/Expenses';
 import Tax from './pages/Tax';
+import TaxRebate from './pages/TaxRebate';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
@@ -26,6 +27,7 @@ function App() {
               <Route path="/income" element={<Income />} />
               <Route path="/expenses" element={<Expenses />} />
               <Route path="/tax" element={<Tax />} />
+              <Route path="/tax-rebate" element={<TaxRebate />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/chat" element={<Chat />} />
               <Route path="/profile" element={<Profile />} />

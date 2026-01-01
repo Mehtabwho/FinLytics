@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import api from '../api/axios';
+import { useFinancialYear } from '../context/FinancialYearContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Bot, User, Sparkles, AlertCircle } from 'lucide-react';
 import { PageTransition } from '../components/Animations';
@@ -12,6 +13,7 @@ const Chat = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  const { year } = useFinancialYear();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -31,7 +33,7 @@ const Chat = () => {
     setLoading(true);
 
     try {
-      const { data } = await api.post('/ai/chat', { message: userMessage.content });
+      const { data } = await api.post('/ai/chat', { message: userMessage.content, financialYear: year });
       setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
     } catch (error) {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error processing your request. Please try again later.' }]);

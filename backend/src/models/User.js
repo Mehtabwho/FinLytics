@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const { getFinancialYear } = require('../utils/financialYearHelper');
 
 const userSchema = new mongoose.Schema({
   name: {

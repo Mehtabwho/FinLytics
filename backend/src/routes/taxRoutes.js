@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Income = require('../models/Income');
 const Expense = require('../models/Expense');
+const UserFinancialInfo = require('../models/UserFinancialInfo');
 const { calculateTax } = require('../services/taxEngine');
 const { explainTax } = require('../services/aiService');
 const { protect } = require('../middleware/authMiddleware');
@@ -16,12 +17,16 @@ router.get('/calculate', protect, async (req, res) => {
     const incomes = await Income.find({ user: req.user._id, financialYear });
     const expenses = await Expense.find({ user: req.user._id, financialYear });
 
+    // Fetch year-specific user info
+    const userInfo = await UserFinancialInfo.findOne({ user: req.user._id, financialYear });
+    const taxpayerCategory = userInfo?.taxpayerCategory || req.user.taxpayerCategory;
+
     const totalIncome = incomes.reduce((acc, item) => acc + item.amount, 0);
     const totalDeductibleExpenses = expenses
       .filter(item => item.isDeductible)
       .reduce((acc, item) => acc + item.amount, 0);
 
-    const taxResult = calculateTax(totalIncome, totalDeductibleExpenses, req.user.taxpayerCategory, financialYear);
+    const taxResult = calculateTax(totalIncome, totalDeductibleExpenses, taxpayerCategory, financialYear);
 
     res.json(taxResult);
   } catch (error) {

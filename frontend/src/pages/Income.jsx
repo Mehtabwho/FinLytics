@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
+import { useFinancialYear } from '../context/FinancialYearContext';
 import { motion } from 'framer-motion';
 import { Plus, Calendar, DollarSign, X, Trash2, TrendingUp } from 'lucide-react';
 import { Card } from '../components/Card';
@@ -14,7 +15,7 @@ const Income = () => {
   const [formData, setFormData] = useState({ source: '', amount: '', date: '', description: '' });
   const [nlText, setNlText] = useState('');
   const [loading, setLoading] = useState(false);
-  const [year, setYear] = useState('2024-2025');
+  const { year } = useFinancialYear();
 
   useEffect(() => {
     fetchIncomes();
@@ -22,7 +23,7 @@ const Income = () => {
 
   const fetchIncomes = async () => {
     try {
-      const { data } = await api.get(`/income?year=${year}`);
+      const { data } = await api.get('/income');
       setIncomes(data);
     } catch (error) {
       console.error(error);
@@ -34,9 +35,9 @@ const Income = () => {
     setLoading(true);
     try {
       if (naturalLanguageMode) {
-        await api.post('/income/ai', { text: nlText });
+        await api.post('/income/ai', { text: nlText, financialYear: year });
       } else {
-        await api.post('/income', formData);
+        await api.post('/income', { ...formData, financialYear: year });
       }
       setShowModal(false);
       setFormData({ source: '', amount: '', date: '', description: '' });
@@ -89,28 +90,9 @@ const Income = () => {
         </div>
         
         <div className="flex flex-wrap gap-3">
-            <div className="relative">
-                <select 
-                    value={year} 
-                    onChange={(e) => setYear(e.target.value)}
-                    className="appearance-none bg-white border border-slate-200 text-slate-700 py-2.5 pl-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-sm font-medium"
-                >
-                    <option value="2024-2025">FY 2024-2025</option>
-                    <option value="2023-2024">FY 2023-2024</option>
-                    <option value="2022-2023">FY 2022-2023</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
-                    <Calendar size={16} />
-                </div>
-            </div>
-
-            <Button 
-                onClick={() => setShowModal(true)}
-                className="flex items-center gap-2"
-            >
-                <Plus size={20} /> 
-                <span>Add Income</span>
-            </Button>
+             <Button onClick={() => setShowModal(true)} icon={<Plus size={18} />}>
+                Add Income
+             </Button>
         </div>
       </motion.div>
 

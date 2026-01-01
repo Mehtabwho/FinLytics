@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import { useFinancialYear } from '../context/FinancialYearContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
@@ -22,7 +23,7 @@ const Dashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [insights, setInsights] = useState(null);
-  const [year, setYear] = useState('2024-2025');
+  const { year } = useFinancialYear();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,10 +31,10 @@ const Dashboard = () => {
         setLoading(true);
         // Parallel fetching for speed
         const [incomeRes, expenseRes, taxRes, insightsRes] = await Promise.all([
-             api.get(`/income?year=${year}`),
-             api.get(`/expenses?year=${year}`),
-             api.get(`/tax/calculate?year=${year}`),
-             api.get(`/ai/insights?year=${year}`).catch(err => ({ data: { insights: null } })) // Handle AI failure gracefully
+             api.get('/income'),
+             api.get('/expenses'),
+             api.get('/tax/calculate'),
+             api.get('/ai/insights').catch(err => ({ data: { insights: null } })) // Handle AI failure gracefully
         ]);
 
         const incomes = incomeRes.data;

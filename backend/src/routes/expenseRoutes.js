@@ -57,7 +57,7 @@ router.post('/', protect, async (req, res) => {
 // @route   POST /api/expenses/ai
 // @access  Private
 router.post('/ai', protect, async (req, res) => {
-    const { text } = req.body;
+    const { text, financialYear } = req.body;
     try {
     const parsed = await parseNaturalLanguage(text);
 
@@ -80,7 +80,7 @@ router.post('/ai', protect, async (req, res) => {
           date: item.date || new Date(),
           description: item.description || text,
           isDeductible: classification ? classification.isDeductible : true,
-          financialYear: req.user.currentFinancialYear,
+          financialYear: financialYear || req.user.currentFinancialYear,
         });
 
         const createdExpense = await expense.save();
@@ -109,7 +109,7 @@ router.post('/ai', protect, async (req, res) => {
       date: parsed.date || new Date(),
       description: parsed.description || text,
       isDeductible: classification ? classification.isDeductible : true,
-      financialYear: req.user.currentFinancialYear,
+      financialYear: financialYear || req.user.currentFinancialYear,
     });
 
     const createdExpense = await expense.save();

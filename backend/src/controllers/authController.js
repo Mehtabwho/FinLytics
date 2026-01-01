@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const UserFinancialInfo = require('../models/UserFinancialInfo');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -133,4 +134,55 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile };
+// @desc    Get user financial info for a year
+// @route   GET /api/auth/financial-info
+// @access  Private
+const getFinancialInfo = async (req, res) => {
+  const financialYear = req.query.year || req.user.currentFinancialYear;
+  try {
+    let info = await UserFinancialInfo.findOne({ user: req.user._id, financialYear });
+    
+    // If no specific info exists, return structure with global defaults
+    if (!info) {
+       return res.json({
+           user: req.user._id,
+           financialYear,
+           taxpayerCategory: req.user.taxpayerCategory,
+           businessType: req.user.businessType,
+           isDefault: true // flag to indicate these are global defaults
+       });
+    }
+    res.json(info);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Update user financial info for a year
+// @route   PUT /api/auth/financial-info
+// @access  Private
+const updateFinancialInfo = async (req, res) => {
+  const { financialYear, taxpayerCategory, businessType } = req.body;
+  
+  if (!financialYear) {
+      return res.status(400).json({ message: 'Financial Year is required' });
+  }
+
+  try {
+    const info = await UserFinancialInfo.findOneAndUpdate(
+      { user: req.user._id, financialYear },
+      { 
+        user: req.user._id, 
+        financialYear,
+        taxpayerCategory,
+        businessType
+      },
+      { new: true, upsert: true }
+    );
+    res.json(info);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile, getFinancialInfo, updateFinancialInfo };

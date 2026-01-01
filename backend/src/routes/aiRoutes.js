@@ -40,13 +40,13 @@ router.get('/insights', protect, async (req, res) => {
 // @route   POST /api/ai/chat
 // @access  Private
 router.post('/chat', protect, async (req, res) => {
-    const { message } = req.body;
-    const financialYear = req.user.currentFinancialYear;
+    const { message, financialYear } = req.body;
+    const year = financialYear || req.user.currentFinancialYear;
 
     try {
         // Gather some context (lightweight)
-        const incomes = await Income.find({ user: req.user._id, financialYear });
-        const expenses = await Expense.find({ user: req.user._id, financialYear });
+        const incomes = await Income.find({ user: req.user._id, financialYear: year });
+        const expenses = await Expense.find({ user: req.user._id, financialYear: year });
         
         const context = {
             userProfile: {

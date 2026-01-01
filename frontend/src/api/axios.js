@@ -9,6 +9,15 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Inject financial year into query params for GET requests
+  if (config.method === 'get') {
+    const year = localStorage.getItem('financialYear');
+    if (year) {
+      config.params = { ...config.params, year };
+    }
+  }
+
   return config;
 }, (error) => {
   return Promise.reject(error);

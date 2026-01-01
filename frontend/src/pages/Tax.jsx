@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
+import { useFinancialYear } from '../context/FinancialYearContext';
 import { motion } from 'framer-motion';
 import { FileText, Info, Calculator, ShieldCheck, AlertCircle, Download, RefreshCw, TrendingUp } from 'lucide-react';
 import { Card } from '../components/Card';
@@ -12,7 +13,7 @@ const Tax = () => {
   const [explanation, setExplanation] = useState('');
   const [loading, setLoading] = useState(true);
   const [explaining, setExplaining] = useState(false);
-  const [year, setYear] = useState('2024-2025');
+  const { year } = useFinancialYear();
 
   useEffect(() => {
     fetchTaxData();
@@ -21,7 +22,7 @@ const Tax = () => {
   const fetchTaxData = async () => {
     setLoading(true);
     try {
-      const { data } = await api.get(`/tax/calculate?year=${year}`);
+      const { data } = await api.get('/tax/calculate');
       setTaxData(data);
       setLoading(false);
     } catch (error) {
@@ -81,19 +82,6 @@ const Tax = () => {
             transition={{ duration: 0.4 }}
             className="flex gap-3"
           >
-            <div className="relative">
-              <select 
-                value={year} 
-                onChange={(e) => setYear(e.target.value)}
-                className="appearance-none bg-white border border-slate-200 text-slate-700 py-2.5 pl-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm font-medium"
-              >
-                <option value="2024-2025">FY 2024-2025</option>
-                <option value="2023-2024">FY 2023-2024</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
-                <Calculator size={16} />
-              </div>
-            </div>
             <Button
               onClick={fetchTaxData}
               variant="secondary"
@@ -117,6 +105,12 @@ const Tax = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
                         <div className="space-y-6">
+                            <div>
+                                <p className="text-slate-500 text-sm mb-1">Assessment Year</p>
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-lg text-slate-700 font-medium text-sm">
+                                    {taxData.assessmentYear || 'N/A'}
+                                </div>
+                            </div>
                             <div>
                                 <p className="text-slate-500 text-sm mb-1">Taxpayer Category</p>
                                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-lg text-slate-700 font-medium capitalize text-sm">

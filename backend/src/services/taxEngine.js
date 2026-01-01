@@ -1,28 +1,35 @@
+const { getAssessmentYear } = require('../utils/financialYearHelper');
+
+const BASE_CONFIG = {
+  thresholds: {
+    general: 350000,
+    female: 400000,
+    senior_citizen: 400000,
+    physically_challenged: 475000,
+    freedom_fighter: 500000,
+  },
+  slabs: [
+    { limit: 100000, rate: 0.05 },
+    { limit: 300000, rate: 0.10 },
+    { limit: 400000, rate: 0.15 },
+    { limit: 500000, rate: 0.20 },
+    { limit: Infinity, rate: 0.25 },
+  ],
+  minimumTax: 5000,
+};
+
 const TAX_CONFIG = {
-  '2024-2025': {
-    thresholds: {
-      general: 350000,
-      female: 400000,
-      senior_citizen: 400000,
-      physically_challenged: 475000,
-      freedom_fighter: 500000,
-    },
-    slabs: [
-      { limit: 100000, rate: 0.05 },
-      { limit: 300000, rate: 0.10 },
-      { limit: 400000, rate: 0.15 },
-      { limit: 500000, rate: 0.20 },
-      { limit: Infinity, rate: 0.25 },
-    ],
-    minimumTax: 5000, // Dhaka/Chittagong City Corp usually
-  }
+  '2023-2024': BASE_CONFIG,
+  '2024-2025': BASE_CONFIG,
+  '2025-2026': BASE_CONFIG,
+  '2026-2027': BASE_CONFIG,
 };
 
 const calculateTax = (totalIncome, totalDeductibleExpenses, taxpayerCategory, financialYear = '2024-2025') => {
-  const config = TAX_CONFIG[financialYear];
-  if (!config) {
-    throw new Error(`Tax rules for financial year ${financialYear} not found.`);
-  }
+  // Fallback to 2024-2025 config if specific year not found, or use BASE_CONFIG
+  const config = TAX_CONFIG[financialYear] || BASE_CONFIG;
+  
+  const assessmentYear = getAssessmentYear(financialYear);
 
   const taxableIncome = Math.max(0, totalIncome - totalDeductibleExpenses);
   let threshold = config.thresholds[taxpayerCategory] || config.thresholds.general;
@@ -56,6 +63,7 @@ const calculateTax = (totalIncome, totalDeductibleExpenses, taxpayerCategory, fi
 
   return {
     financialYear,
+    assessmentYear,
     totalIncome,
     totalDeductibleExpenses,
     taxableIncome,

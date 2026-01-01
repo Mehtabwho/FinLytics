@@ -1,5 +1,6 @@
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import FinancialYearSelector from './FinancialYearSelector';
 import { 
   LayoutDashboard, 
   TrendingUp, 
@@ -37,7 +38,11 @@ const Layout = () => {
             </div>
         </div>
         
-        <nav className="flex-1 p-4 space-y-1">
+        <div className="mt-4">
+          <FinancialYearSelector />
+        </div>
+
+        <nav className="flex-1 p-4 space-y-1 pt-0">
           {navItems.map((item) => (
             <Link
               key={item.path}

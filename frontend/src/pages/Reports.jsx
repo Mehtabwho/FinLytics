@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import api from '../services/api';
+import { useFinancialYear } from '../context/FinancialYearContext';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
@@ -20,7 +21,7 @@ const Reports = () => {
     expenses: [],
     tax: 0
   });
-  const [year, setYear] = useState('2024-2025');
+  const { year } = useFinancialYear();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,9 +29,9 @@ const Reports = () => {
         setLoading(true);
         // Parallel fetching
         const [incomeRes, expenseRes, taxRes] = await Promise.all([
-            api.get(`/income?year=${year}`),
-            api.get(`/expenses?year=${year}`),
-            api.get(`/tax/calculate?year=${year}`) // Assuming tax endpoint supports GET calculation
+            api.get('/income'),
+            api.get('/expenses'),
+            api.get('/tax/calculate') // Assuming tax endpoint supports GET calculation
         ]);
 
         setFinancialData({
@@ -230,16 +231,6 @@ const Reports = () => {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <select 
-              value={year} 
-              onChange={(e) => setYear(e.target.value)}
-              className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all flex items-center gap-2"
-            >
-              <option value="2023-2024">2023-2024</option>
-              <option value="2024-2025">2024-2025</option>
-            </select>
-          </motion.div>
           <Button variant="primary" onClick={handleDownloadPDF} className="flex items-center gap-2">
             <Download size={16} />
             <span>Download PDF</span>

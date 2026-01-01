@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { getFinancialYear } = require('../utils/financialYearHelper');
 
 const incomeSchema = new mongoose.Schema({
   user: {
@@ -22,6 +23,7 @@ const incomeSchema = new mongoose.Schema({
   financialYear: {
     type: String,
     required: true,
+    default: () => getFinancialYear(),
   },
   description: {
     type: String,

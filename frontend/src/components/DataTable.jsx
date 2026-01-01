@@ -65,12 +65,12 @@ export const DataTable = ({
                   className="group transition-colors"
                 >
                   {row.map((cell, cellIdx) => (
-                    <td key={cellIdx} className="p-5 text-sm text-slate-600">
+                    <td key={cellIdx} className="p-4 text-sm text-slate-600 align-middle">
                       {cell}
                     </td>
                   ))}
                   {onDelete && (
-                    <td className="p-5 text-center">
+                    <td className="p-4 text-center align-middle">
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}

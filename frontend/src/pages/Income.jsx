@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import api from '../api/axios';
 import { useFinancialYear } from '../context/FinancialYearContext';
 import { motion } from 'framer-motion';
-import { Plus, Calendar, DollarSign, X, Trash2, TrendingUp } from 'lucide-react';
+import { Plus, Calendar, DollarSign, X, Trash2, TrendingUp, Search, Filter } from 'lucide-react';
 import { Card } from '../components/Card';
 import { DataTable } from '../components/DataTable';
-import { PageTransition } from '../components/Animations';
+import { PageTransition, StaggerContainer } from '../components/Animations';
 import Button from '../components/Button';
 
 const Income = () => {
@@ -15,6 +15,7 @@ const Income = () => {
   const [formData, setFormData] = useState({ source: '', amount: '', date: '', description: '' });
   const [nlText, setNlText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const { year } = useFinancialYear();
 
   useEffect(() => {
@@ -29,6 +30,16 @@ const Income = () => {
       console.error(error);
     }
   };
+
+  const filteredIncomes = useMemo(() => {
+    return incomes.filter(income => 
+      income.source.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      income.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    ).sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [incomes, searchTerm]);
+
+  const totalIncome = useMemo(() => incomes.reduce((sum, item) => sum + item.amount, 0), [incomes]);
+  const averageIncome = useMemo(() => incomes.length > 0 ? totalIncome / incomes.length : 0, [incomes, totalIncome]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,10 +63,16 @@ const Income = () => {
   };
 
   const handleDelete = async (idx) => {
-    const id = incomes[idx]._id;
+    // Original index logic might be wrong if filtered, so we should pass ID directly or find correct index
+    // However, DataTable passes the index of the row being displayed.
+    // If we pass filteredIncomes to DataTable, the index corresponds to filteredIncomes.
+    // We need to find the actual item from filteredIncomes[idx]
+    const itemToDelete = filteredIncomes[idx];
+    if (!itemToDelete) return;
+
     if (confirm('Are you sure you want to delete this record?')) {
       try {
-        await api.delete(`/income/${id}`);
+        await api.delete(`/income/${itemToDelete._id}`);
         fetchIncomes();
       } catch (error) {
         console.error(error);
@@ -63,11 +80,17 @@ const Income = () => {
     }
   };
 
-  const tableRows = incomes.map((income) => [
-    new Date(income.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-    income.source,
-    income.description || '-',
-    <span key={income._id} className="text-secondary font-bold bg-secondary/10 px-3 py-1 rounded-full text-sm">
+  const tableRows = filteredIncomes.map((income) => [
+    <span key={`date-${income._id}`} className="whitespace-nowrap font-medium text-slate-700">
+      {new Date(income.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+    </span>,
+    <div key={`source-${income._id}`} className="max-w-[150px] truncate font-medium text-slate-800" title={income.source}>
+      {income.source}
+    </div>,
+    <div key={`desc-${income._id}`} className="max-w-[200px] truncate text-slate-500" title={income.description}>
+      {income.description || '-'}
+    </div>,
+    <span key={income._id} className="text-secondary font-bold bg-secondary/10 px-3 py-1 rounded-full text-sm whitespace-nowrap">
       +৳{income.amount.toLocaleString()}
     </span>
   ]);
@@ -83,10 +106,10 @@ const Income = () => {
         className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
       >
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold text-slate-900">
             Income Management
           </h1>
-          <p className="text-slate-500 text-sm mt-2">Track and manage your revenue sources</p>
+          <p className="text-slate-500 text-sm mt-1">Track and manage your revenue sources</p>
         </div>
         
         <div className="flex flex-wrap gap-3">
@@ -96,12 +119,69 @@ const Income = () => {
         </div>
       </motion.div>
 
-      {/* Table */}
+      {/* Stats Cards */}
+      <StaggerContainer delay={0.1}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+            <Card>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">Total Income</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">৳{totalIncome.toLocaleString()}</p>
+                </div>
+                <div className="p-3 bg-secondary/10 rounded-xl">
+                  <DollarSign className="text-secondary" size={24} />
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+            <Card>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">Average Transaction</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">৳{averageIncome.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                </div>
+                <div className="p-3 bg-blue-50 rounded-xl">
+                  <TrendingUp className="text-blue-500" size={24} />
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+             <Card>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">Total Transactions</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">{incomes.length}</p>
+                </div>
+                <div className="p-3 bg-purple-50 rounded-xl">
+                  <Calendar className="text-purple-500" size={24} />
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        </div>
+      </StaggerContainer>
+
+      {/* Table Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        className="space-y-4"
       >
+        <div className="flex items-center gap-4 bg-white p-2 rounded-xl border border-slate-200 w-full sm:w-96">
+            <Search className="text-slate-400" size={20} />
+            <input 
+                type="text" 
+                placeholder="Search by source or description..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="bg-transparent border-none focus:outline-none text-slate-700 w-full placeholder:text-slate-400"
+            />
+        </div>
+
         <DataTable 
           headers={['Date', 'Source', 'Description', 'Amount']}
           rows={tableRows}

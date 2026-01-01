@@ -7,24 +7,21 @@ const FinancialYearSelector = () => {
   const years = ['2023-2024', '2024-2025', '2025-2026', '2026-2027'];
 
   return (
-    <div className="px-4 pb-4">
-      <div className="bg-primary/5 rounded-xl p-3 border border-primary/10">
-        <label className="text-xs font-semibold text-primary/70 mb-1.5 flex items-center gap-1">
-          <Calendar size={12} />
-          Financial Year
-        </label>
-        <select
-          value={year}
-          onChange={(e) => setYear(e.target.value)}
-          className="w-full bg-white border border-primary/20 text-primary text-sm rounded-lg focus:ring-primary focus:border-primary block p-2 font-medium cursor-pointer hover:border-primary/40 transition-colors outline-none"
-        >
-          {years.map((y) => (
-            <option key={y} value={y}>
-              {y}
-            </option>
-          ))}
-        </select>
+    <div className="relative">
+      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+        <Calendar size={14} />
       </div>
+      <select
+        value={year}
+        onChange={(e) => setYear(e.target.value)}
+        className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary block pl-9 pr-3 py-2 font-medium cursor-pointer hover:bg-slate-100 transition-colors outline-none appearance-none"
+      >
+        {years.map((y) => (
+          <option key={y} value={y}>
+            FY {y}
+          </option>
+        ))}
+      </select>
     </div>
   );
 };

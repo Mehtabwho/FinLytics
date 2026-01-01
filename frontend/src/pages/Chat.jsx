@@ -86,7 +86,7 @@ const Chat = () => {
                   <motion.div 
                     whileHover={{ scale: 1.1 }}
                     className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        msg.role === 'user' ? 'bg-indigo-100 text-indigo-600' : 'bg-primary text-secondary'
+                        msg.role === 'user' ? 'bg-secondary text-white' : 'bg-primary text-white'
                     }`}
                   >
                     {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
@@ -97,7 +97,7 @@ const Chat = () => {
                     whileHover={{ scale: 1.02 }}
                     className={`p-4 rounded-2xl shadow-sm text-sm leading-relaxed transition-all ${
                         msg.role === 'user' 
-                            ? 'bg-indigo-600 text-white rounded-br-none' 
+                            ? 'bg-secondary text-white rounded-br-none' 
                             : 'bg-white border border-slate-100 text-slate-700 rounded-bl-none'
                     }`}
                   >

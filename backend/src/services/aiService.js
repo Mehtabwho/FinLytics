@@ -112,8 +112,12 @@ const classifyExpense = async (description) => {
 };
 
 const parseNaturalLanguage = async (text) => {
+  const today = new Date().toISOString().split('T')[0];
   const prompt = `Parse this financial statement: "${text}".
   Identify whether the statement describes an "income" (money received) or an "expense" (money paid out).
+  
+  Current Date: ${today} (Use this date if no specific date is mentioned in the text)
+
   Rules:
   - Treat verbs like "paid", "paid to", "paid for", "gave" as expense.
   - Treat verbs like "received", "got", "earned", "invoice" (when received) as income.
@@ -121,15 +125,15 @@ const parseNaturalLanguage = async (text) => {
   - Extract the numeric amount (strip currency symbols) as a number.
   - Extract a short description string.
   - Extract a category for expenses (e.g., Salary, Rent, Utilities, Inventory, Transport, Misc) when possible.
-  - If no date is present, set date to today's date in YYYY-MM-DD.
+  - If no date is present, set date to ${today}.
     Return ONLY a valid JSON object or a JSON array (if multiple items are described) — no markdown, no explanation.
     If the text contains multiple expenses/incomes (for example comma-separated or joined by "and"), return a JSON array of objects, one per item.
     Example responses:
-    For single: "paid salary 20000": {"type":"expense","amount":20000,"category":"Salary","description":"paid salary","date":"2025-12-28"}
+    For single: "paid salary 20000": {"type":"expense","amount":20000,"category":"Salary","description":"paid salary","date":"${today}"}
     For multiple: "salary 2000, bill 1500, transportation 1000": [
-      {"type":"expense","amount":2000,"category":"Salary","description":"salary 2000","date":"2025-12-28"},
-      {"type":"expense","amount":1500,"category":"Utilities","description":"bill 1500","date":"2025-12-28"},
-      {"type":"expense","amount":1000,"category":"Transport","description":"transportation 1000","date":"2025-12-28"}
+      {"type":"expense","amount":2000,"category":"Salary","description":"salary 2000","date":"${today}"},
+      {"type":"expense","amount":1500,"category":"Utilities","description":"bill 1500","date":"${today}"},
+      {"type":"expense","amount":1000,"category":"Transport","description":"transportation 1000","date":"${today}"}
     ]
     Always follow the schema exactly:
     { "type": "income" | "expense", "amount": number, "source": "string (if income)", "category": "string (if expense)", "description": "string", "date": "YYYY-MM-DD" }

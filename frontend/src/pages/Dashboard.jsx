@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import api from '../services/api';
+import api from '../api/axios';
 import { useFinancialYear } from '../context/FinancialYearContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -123,14 +123,7 @@ const Dashboard = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <select 
-              value={year} 
-              onChange={(e) => setYear(e.target.value)}
-              className="border border-slate-200 p-2.5 rounded-xl bg-white shadow-sm text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium"
-            >
-              <option value="2024-2025">FY 2024-2025</option>
-              <option value="2023-2024">FY 2023-2024</option>
-            </select>
+            
           </motion.div>
         </div>
 

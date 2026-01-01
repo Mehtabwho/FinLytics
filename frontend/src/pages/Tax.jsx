@@ -146,7 +146,7 @@ const Tax = () => {
 
                 {/* Breakdown Table */}
                 <Card className="overflow-hidden" hover={false}>
-                    <div className="p-5 border-b border-slate-100 bg-slate-50/50">
+                    <div className="p-5 border-b border-slate-100 bg-white">
                         <h3 className="font-semibold text-slate-800 flex items-center gap-2">
                             <FileText size={18} className="text-slate-400" /> 
                             Calculation Breakdown (Slab-wise)
@@ -154,34 +154,34 @@ const Tax = () => {
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-slate-50 text-slate-500">
+                            <thead className="bg-slate-50/50 border-b border-slate-100 text-slate-600">
                                 <tr>
-                                    <th className="p-4 font-medium">Income Slab</th>
-                                    <th className="p-4 font-medium">Chargeable Amount</th>
-                                    <th className="p-4 font-medium">Tax Rate</th>
-                                    <th className="p-4 font-medium text-right">Tax Amount</th>
+                                    <th className="p-4 font-semibold whitespace-nowrap">Income Slab</th>
+                                    <th className="p-4 font-semibold whitespace-nowrap">Chargeable Amount</th>
+                                    <th className="p-4 font-semibold whitespace-nowrap">Tax Rate</th>
+                                    <th className="p-4 font-semibold text-right whitespace-nowrap">Tax Amount</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {taxData.breakdown.map((item, index) => (
-                                    <tr key={index} className="hover:bg-slate-50/50 transition-colors">
-                                        <td className="p-4 font-medium text-slate-700">{item.slab}</td>
-                                        <td className="p-4 text-slate-600">৳{item.amount.toLocaleString()}</td>
-                                        <td className="p-4">
-                                            <span className="px-2 py-1 bg-slate-100 rounded text-xs font-semibold text-slate-600">
+                                    <tr key={index} className="hover:bg-slate-50/50 transition-colors group">
+                                        <td className="p-4 font-medium text-slate-700 whitespace-nowrap">{item.slab}</td>
+                                        <td className="p-4 text-slate-600 whitespace-nowrap">৳{item.amount.toLocaleString()}</td>
+                                        <td className="p-4 whitespace-nowrap">
+                                            <span className="px-2.5 py-1 bg-slate-100 rounded-md text-xs font-semibold text-slate-600 border border-slate-200">
                                                 {(item.rate * 100)}%
                                             </span>
                                         </td>
-                                        <td className="p-4 text-right font-mono font-medium text-slate-700">
+                                        <td className="p-4 text-right font-mono font-medium text-slate-700 whitespace-nowrap">
                                             ৳{item.tax.toLocaleString()}
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
-                            <tfoot className="bg-slate-50/80 font-bold text-slate-800">
+                            <tfoot className="bg-slate-50 border-t border-slate-200 font-bold text-slate-800">
                                 <tr>
-                                    <td colSpan="3" className="p-4 text-right">Total Tax</td>
-                                    <td className="p-4 text-right">৳{taxData.taxPayable.toLocaleString()}</td>
+                                    <td colSpan="3" className="p-4 text-right whitespace-nowrap">Total Tax Payable</td>
+                                    <td className="p-4 text-right text-primary text-lg whitespace-nowrap">৳{taxData.taxPayable.toLocaleString()}</td>
                                 </tr>
                             </tfoot>
                         </table>

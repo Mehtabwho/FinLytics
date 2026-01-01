@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import api from '../api/axios';
 import { useFinancialYear } from '../context/FinancialYearContext';
 import { motion } from 'framer-motion';
-import { Plus, Calendar, Trash2, X, Receipt, Tag } from 'lucide-react';
+import { Plus, Calendar, Trash2, X, Receipt, Tag, Search, TrendingDown, DollarSign } from 'lucide-react';
 import { Card } from '../components/Card';
 import { DataTable } from '../components/DataTable';
-import { PageTransition } from '../components/Animations';
+import { PageTransition, StaggerContainer } from '../components/Animations';
 import Button from '../components/Button';
 
 const Expenses = () => {
@@ -15,6 +15,7 @@ const Expenses = () => {
   const [formData, setFormData] = useState({ category: '', amount: '', date: '', description: '', isDeductible: true });
   const [nlText, setNlText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const { year } = useFinancialYear();
 
   useEffect(() => {
@@ -29,6 +30,16 @@ const Expenses = () => {
       console.error(error);
     }
   };
+
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter(expense => 
+      expense.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      expense.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    ).sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [expenses, searchTerm]);
+
+  const totalExpense = useMemo(() => expenses.reduce((sum, item) => sum + item.amount, 0), [expenses]);
+  const deductibleExpense = useMemo(() => expenses.filter(e => e.isDeductible).reduce((sum, item) => sum + item.amount, 0), [expenses]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,10 +63,12 @@ const Expenses = () => {
   };
 
   const handleDelete = async (idx) => {
-    const id = expenses[idx]._id;
+    const itemToDelete = filteredExpenses[idx];
+    if (!itemToDelete) return;
+
     if (confirm('Are you sure you want to delete this expense?')) {
       try {
-        await api.delete(`/expenses/${id}`);
+        await api.delete(`/expenses/${itemToDelete._id}`);
         fetchExpenses();
       } catch (error) {
         console.error(error);
@@ -63,21 +76,25 @@ const Expenses = () => {
     }
   };
 
-  const tableRows = expenses.map((expense) => [
-    new Date(expense.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-    <span key={expense._id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-medium">
+  const tableRows = filteredExpenses.map((expense) => [
+    <span key={`date-${expense._id}`} className="whitespace-nowrap font-medium text-slate-700">
+      {new Date(expense.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+    </span>,
+    <span key={expense._id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-medium whitespace-nowrap">
       <Tag size={12} />
       {expense.category}
     </span>,
-    expense.description || '-',
-    <span key={`deductible-${expense._id}`} className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+    <div key={`desc-${expense._id}`} className="max-w-[200px] truncate text-slate-500" title={expense.description}>
+      {expense.description || '-'}
+    </div>,
+    <span key={`deductible-${expense._id}`} className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
       expense.isDeductible 
         ? 'bg-green-100 text-green-700' 
         : 'bg-slate-100 text-slate-500'
     }`}>
       {expense.isDeductible ? 'Yes' : 'No'}
     </span>,
-    <span key={`amount-${expense._id}`} className="text-red-500 font-bold bg-red-50 px-3 py-1 rounded-full text-sm">
+    <span key={`amount-${expense._id}`} className="text-red-500 font-bold bg-red-50 px-3 py-1 rounded-full text-sm whitespace-nowrap">
       -৳{expense.amount.toLocaleString()}
     </span>
   ]);
@@ -93,10 +110,10 @@ const Expenses = () => {
         className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
       >
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold text-slate-900">
             Expense Management
           </h1>
-          <p className="text-slate-500 text-sm mt-2">Track spending and optimize tax deductions</p>
+          <p className="text-slate-500 text-sm mt-1">Track spending and optimize tax deductions</p>
         </div>
         
         <div className="flex flex-wrap gap-3">
@@ -111,12 +128,69 @@ const Expenses = () => {
         </div>
       </motion.div>
 
-      {/* Table */}
+      {/* Stats Cards */}
+      <StaggerContainer delay={0.1}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+            <Card>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">Total Expenses</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">৳{totalExpense.toLocaleString()}</p>
+                </div>
+                <div className="p-3 bg-red-50 rounded-xl">
+                  <TrendingDown className="text-red-500" size={24} />
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+            <Card>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">Deductible Expenses</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">৳{deductibleExpense.toLocaleString()}</p>
+                </div>
+                <div className="p-3 bg-green-50 rounded-xl">
+                  <DollarSign className="text-green-500" size={24} />
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+             <Card>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">Total Transactions</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">{expenses.length}</p>
+                </div>
+                <div className="p-3 bg-purple-50 rounded-xl">
+                  <Calendar className="text-purple-500" size={24} />
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        </div>
+      </StaggerContainer>
+
+      {/* Table Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        className="space-y-4"
       >
+        <div className="flex items-center gap-4 bg-white p-2 rounded-xl border border-slate-200 w-full sm:w-96">
+            <Search className="text-slate-400" size={20} />
+            <input 
+                type="text" 
+                placeholder="Search by category or description..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="bg-transparent border-none focus:outline-none text-slate-700 w-full placeholder:text-slate-400"
+            />
+        </div>
+
         <DataTable 
           headers={['Date', 'Category', 'Description', 'Deductible', 'Amount']}
           rows={tableRows}

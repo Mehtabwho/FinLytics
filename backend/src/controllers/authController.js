@@ -162,7 +162,8 @@ const getFinancialInfo = async (req, res) => {
 // @route   PUT /api/auth/financial-info
 // @access  Private
 const updateFinancialInfo = async (req, res) => {
-  const { financialYear, taxpayerCategory, businessType } = req.body;
+  const { taxpayerCategory, businessType } = req.body;
+  const financialYear = req.body.financialYear || req.user.currentFinancialYear;
   
   if (!financialYear) {
       return res.status(400).json({ message: 'Financial Year is required' });

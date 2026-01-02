@@ -63,6 +63,9 @@ const loginUser = async (req, res) => {
         email: user.email,
         businessType: user.businessType,
         taxpayerCategory: user.taxpayerCategory,
+        currentFinancialYear: user.currentFinancialYear,
+        avatar: user.avatar,
+        phone: user.phone,
         token: generateToken(user._id),
       });
     } else {
@@ -88,6 +91,8 @@ const getUserProfile = async (req, res) => {
         businessType: user.businessType,
         taxpayerCategory: user.taxpayerCategory,
         currentFinancialYear: user.currentFinancialYear,
+        avatar: user.avatar,
+        phone: user.phone,
       });
     } else {
       res.status(404).json({ message: 'User not found' });
@@ -110,8 +115,16 @@ const updateUserProfile = async (req, res) => {
       user.businessType = req.body.businessType || user.businessType;
       user.taxpayerCategory = req.body.taxpayerCategory || user.taxpayerCategory;
       user.currentFinancialYear = req.body.currentFinancialYear || user.currentFinancialYear;
+      user.avatar = req.body.avatar !== undefined ? req.body.avatar : user.avatar;
+      user.phone = req.body.phone !== undefined ? req.body.phone : user.phone;
       
       if (req.body.password) {
+        if (req.body.currentPassword) {
+           const isMatch = await user.matchPassword(req.body.currentPassword);
+           if (!isMatch) {
+               return res.status(401).json({ message: 'Invalid current password' });
+           }
+        }
         user.password = req.body.password;
       }
 
@@ -124,6 +137,8 @@ const updateUserProfile = async (req, res) => {
         businessType: updatedUser.businessType,
         taxpayerCategory: updatedUser.taxpayerCategory,
         currentFinancialYear: updatedUser.currentFinancialYear,
+        avatar: updatedUser.avatar,
+        phone: updatedUser.phone,
         token: generateToken(updatedUser._id),
       });
     } else {

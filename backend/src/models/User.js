@@ -29,6 +29,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '2024-2025',
   },
+  avatar: {
+    type: String, // Base64 encoded string or URL
+    default: '',
+  },
+  phone: {
+    type: String,
+    default: '',
+  },
 }, {
   timestamps: true,
 });

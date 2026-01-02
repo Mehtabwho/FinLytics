@@ -140,9 +140,17 @@ const Layout = () => {
                 <p className="text-sm font-semibold text-slate-700 leading-tight">{user?.name}</p>
               </div>
               <Link to="/profile">
-                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold shadow-md ring-2 ring-white cursor-pointer hover:ring-secondary transition-all">
-                  {user?.name?.charAt(0).toUpperCase()}
-                </div>
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="w-10 h-10 rounded-full object-cover shadow-md ring-2 ring-white cursor-pointer hover:ring-secondary transition-all"
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold shadow-md ring-2 ring-white cursor-pointer hover:ring-secondary transition-all">
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </div>
+                )}
               </Link>
             </div>
           </div>

@@ -14,7 +14,8 @@ import {
   Menu,
   Bell,
   Search,
-  ChevronDown
+  ChevronDown,
+  Percent
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -28,6 +29,7 @@ const Layout = () => {
     { path: '/income', label: 'Income', icon: <TrendingUp size={20} /> },
     { path: '/expenses', label: 'Expenses', icon: <TrendingDown size={20} /> },
     { path: '/tax', label: 'Tax Manager', icon: <Calculator size={20} /> },
+    { path: '/tax-rebate', label: 'Tax Rebate', icon: <Percent size={20} /> },
     { path: '/reports', label: 'Reports', icon: <BarChart3 size={20} /> },
     { path: '/chat', label: 'AI Assistant', icon: <MessageSquare size={20} /> },
   ];
@@ -56,7 +58,7 @@ const Layout = () => {
             )}
         </div>
         
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-none">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto sidebar-scroll">
           {navItems.map((item) => (
             <Link
               key={item.path}

@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Calculator, Percent, Info, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { PageTransition, StaggerContainer } from '../components/Animations';
 
 // Tax Rebate rules for Bangladesh (as provided)
 const INVESTMENT_RULES = [
@@ -109,19 +111,24 @@ const TaxRebate = () => {
   }, [breakdown, taxableIncome]);
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-            <Calculator size={22} />
+    <PageTransition>
+      <div className="p-6 space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="flex items-center justify-between"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+              <Calculator size={22} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">Tax Rebate Calculator (Bangladesh)</h1>
+              <p className="text-sm text-slate-500">Compute allowable tax rebates across investments with caps and rules.</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Tax Rebate Calculator (Bangladesh)</h1>
-            <p className="text-sm text-slate-500">Compute allowable tax rebates across investments with caps and rules.</p>
-          </div>
-        </div>
-      </div>
+        </motion.div>
 
       {/* Taxable Income */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -149,7 +156,6 @@ const TaxRebate = () => {
         </div>
       </div>
 
-      {/* Investment inputs and breakdown */}
       <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
           <Percent size={18} className="text-primary" />
@@ -194,8 +200,8 @@ const TaxRebate = () => {
         </div>
       </div>
 
-      {/* Lower notes removed as requested */}
-    </div>
+      </div>
+    </PageTransition>
   );
 };
 

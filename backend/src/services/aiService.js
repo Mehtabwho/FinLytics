@@ -17,7 +17,8 @@ const callOpenRouter = async (messages) => {
       },
       body: JSON.stringify({
         "model": OPENROUTER_MODEL,
-        "messages": messages
+        "messages": messages,
+        "max_tokens": 1024 // Limit token usage to prevent exceeding credits
       })
     });
 

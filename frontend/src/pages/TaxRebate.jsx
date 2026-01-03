@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Calculator, Percent, Info, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PageTransition, StaggerContainer } from '../components/Animations';
+import api from '../api/axios';
+import { useFinancialYear } from '../context/FinancialYearContext';
 
 // Tax Rebate rules for Bangladesh (as provided)
 const INVESTMENT_RULES = [
@@ -71,6 +73,7 @@ const parseBDT = (value) => {
 };
 
 const TaxRebate = () => {
+  const { year } = useFinancialYear();
   const [taxableIncome, setTaxableIncome] = useState('');
   const [inputs, setInputs] = useState(
     INVESTMENT_RULES.reduce((acc, r) => {
@@ -78,6 +81,10 @@ const TaxRebate = () => {
       return acc;
     }, {})
   );
+  const [incomeTax, setIncomeTax] = useState(0);
+  const [advisor, setAdvisor] = useState(null);
+  const [advisorError, setAdvisorError] = useState('');
+  const [advisorLoading, setAdvisorLoading] = useState(false);
 
   const handleInput = (key, value) => {
     setInputs((prev) => ({ ...prev, [key]: value }));
@@ -85,6 +92,35 @@ const TaxRebate = () => {
 
   const handleTaxableIncomeChange = (value) => {
     setTaxableIncome(value);
+  };
+
+  useEffect(() => {
+    const loadTax = async () => {
+      try {
+        const { data } = await api.get('/tax/calculate');
+        setIncomeTax(data.taxPayable || 0);
+      } catch (e) {
+        setIncomeTax(0);
+      }
+    };
+    loadTax();
+    setAdvisor(null);
+    setAdvisorError('');
+    setAdvisorLoading(false);
+  }, [year]);
+
+  const analyzeAdvisor = async () => {
+    setAdvisorError('');
+    setAdvisorLoading(true);
+    try {
+      const { data: ai } = await api.post('/ai/rebate-advisor', { incomeTax, taxYear: year });
+      setAdvisor(ai.insights);
+    } catch (e) {
+      setAdvisor(null);
+      setAdvisorError('AI insights are temporarily unavailable. Your rebate calculation is unaffected.');
+    } finally {
+      setAdvisorLoading(false);
+    }
   };
 
   const breakdown = useMemo(() => {
@@ -106,9 +142,19 @@ const TaxRebate = () => {
   const totals = useMemo(() => {
     const totalRebate = breakdown.reduce((sum, b) => sum + b.rebate, 0);
     const income = parseBDT(taxableIncome);
-    const netPayable = taxableIncome - totalRebate; // Net payable tax after rebate
+    const netPayable = taxableIncome - totalRebate;
     return { totalRebate, netPayable, income };
   }, [breakdown, taxableIncome]);
+
+  const netPayableTax = useMemo(() => {
+    return Math.max(0, incomeTax - breakdown.reduce((sum, b) => sum + b.rebate, 0));
+  }, [incomeTax, breakdown]);
+
+  const addToCalculator = (option, amount) => {
+    const found = INVESTMENT_RULES.find(r => r.label.toLowerCase() === String(option || '').toLowerCase() || String(option || '').toLowerCase().includes(r.label.toLowerCase()));
+    if (!found) return;
+    setInputs(prev => ({ ...prev, [found.key]: amount }));
+  };
 
   return (
     <PageTransition>
@@ -124,25 +170,71 @@ const TaxRebate = () => {
               <Calculator size={22} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-800">Tax Rebate Calculator (Bangladesh)</h1>
+              <h1 className="text-2xl font-bold text-slate-800">Tax Rebate Advisor & Calculator </h1>
               <p className="text-sm text-slate-500">Compute allowable tax rebates across investments with caps and rules.</p>
             </div>
           </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6 rounded-xl border border-slate-800/40"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-amber-400/20 rounded-xl flex items-center justify-center">
+                <span className="text-xl">🧠</span>
+              </div>
+              <h2 className="text-xl font-semibold">AI Tax Rebate Advisor</h2>
+            </div>
+            {!advisor && (
+              <button 
+                onClick={analyzeAdvisor} 
+                disabled={advisorLoading}
+                className="text-xs bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {advisorLoading ? 'Analyzing...' : 'Analyze Now'}
+              </button>
+            )}
+          </div>
+          {advisorLoading ? (
+            <div className="text-slate-300 text-sm">Analyzing your tax level...</div>
+          ) : advisorError ? (
+            <div className="text-slate-300 text-sm">{advisorError}</div>
+          ) : advisor && advisor.summary && advisor.suggestions?.length ? (
+            <div className="space-y-4">
+              <p className="text-slate-200 text-sm leading-relaxed">{advisor.summary}</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {advisor.suggestions?.map((s, i) => (
+                  <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-semibold">{s.option}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-md bg-white/10 border border-white/10">{s.risk}</span>
+                    </div>
+                    <div className="text-sm text-slate-300 mb-2">Suggested Amount: {formatCurrency(s.suggestedAmount)}</div>
+                    <div className="text-xs text-slate-300 mb-3 leading-relaxed">{s.reason}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="text-xs text-slate-400">{advisor.disclaimer}</div>
+            </div>
+          ) : (
+            <div className="text-slate-300 text-sm italic border border-white/10 rounded-xl p-4 bg-white/5">
+              <p className="mb-2">Click "Analyze Now" to get investment suggestions commonly used by Bangladesh taxpayers with similar tax levels.</p>
+            </div>
+          )}
         </motion.div>
 
       {/* Taxable Income */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm lg:col-span-1">
-          <label className="text-sm text-slate-600 font-medium">Taxable Income (BDT)</label>
-          <input
-            type="text"
-            value={taxableIncome}
-            onChange={(e) => handleTaxableIncomeChange(e.target.value)}
-            placeholder="Enter taxable income"
-            className="mt-2 w-full border border-slate-200 rounded-lg p-3 focus:ring-2 focus:ring-primary focus:outline-none"
-          />
-          <p className="text-xs text-slate-500 mt-2">Parsed value: {formatCurrency(parseBDT(taxableIncome))}</p>
-          {/* aggregate cap note removed as requested */}
+           <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+            <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+              <p className="text-sm text-slate-500">Income Tax</p>
+              <p className="text-xl font-bold text-slate-800 mt-1">{formatCurrency(incomeTax)}</p>
+            </div>
+          </div>
         </div>
 
         {/* Aggregate Summary */}
@@ -151,6 +243,10 @@ const TaxRebate = () => {
             <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
               <p className="text-sm text-slate-500">Total Rebate (before cap)</p>
               <p className="text-xl font-bold text-slate-800 mt-1">{formatCurrency(totals.totalRebate)}</p>
+            </div>
+            <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+              <p className="text-sm text-slate-500">Net Payable Tax</p>
+              <p className="text-xl font-bold text-slate-800 mt-1">{formatCurrency(netPayableTax)}</p>
             </div>
           </div>
         </div>

@@ -18,7 +18,7 @@ const callOpenRouter = async (messages) => {
       body: JSON.stringify({
         "model": OPENROUTER_MODEL,
         "messages": messages,
-        "max_tokens": 1024 // Limit token usage to prevent exceeding credits
+        "max_tokens": 350 // Limit token usage to prevent exceeding credits
       })
     });
 
@@ -228,10 +228,42 @@ const chatWithAI = async (message, context) => {
     return await generateContent(prompt);
 }
 
+const getTaxRebateAdvisorInsights = async ({ incomeTax, taxYear }) => {
+  if (!OPENROUTER_API_KEY) {
+    throw new Error('AI Service Unavailable');
+  }
+  const prompt = `You are an AI Tax Rebate Advisor for Bangladesh.
+Income Tax: ${incomeTax}
+Tax Year: ${taxYear}
+
+Rules:
+- Do not calculate tax or rebate.
+- Do not reference rebate caps, limits, or remaining capacity.
+- Do not guarantee savings.
+- Do not override NBR rules.
+- Base suggestions only on the user's income tax level.
+- Suggest practical, NBR-compliant investment options commonly considered by similar taxpayers.
+
+Return only valid JSON with this schema:
+{
+  "summary": string,
+  "suggestions": [
+    { "option": string, "suggestedAmount": number, "reason": string, "risk": "Low risk" | "Medium risk" | "High risk" }
+  ],
+  "disclaimer": string
+}`;
+  const result = await generateJSON(prompt);
+  if (!result || !result.summary || !Array.isArray(result.suggestions)) {
+    throw new Error('AI Service Unavailable');
+  }
+  return result;
+}
+
 module.exports = {
   classifyExpense,
   parseNaturalLanguage,
   explainTax,
   getInvestmentInsights,
-  chatWithAI
+  chatWithAI,
+  getTaxRebateAdvisorInsights
 };

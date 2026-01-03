@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Income = require('../models/Income');
 const Expense = require('../models/Expense');
-const { getInvestmentInsights, chatWithAI } = require('../services/aiService');
+const { getInvestmentInsights, chatWithAI, getTaxRebateAdvisorInsights } = require('../services/aiService');
 const { protect } = require('../middleware/authMiddleware');
 
 // @desc    Get Investment Insights
@@ -65,6 +65,17 @@ router.post('/chat', protect, async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+});
+
+router.post('/rebate-advisor', protect, async (req, res) => {
+  try {
+    const incomeTax = req.body.incomeTax;
+    const taxYear = req.body.taxYear || req.user.currentFinancialYear;
+    const insights = await getTaxRebateAdvisorInsights({ incomeTax, taxYear });
+    res.json({ insights });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
 module.exports = router;

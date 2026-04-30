@@ -105,6 +105,7 @@ const Tax = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
                         <div className="space-y-6">
+                          
                             <div>
                                 <p className="text-slate-500 text-sm mb-1">Assessment Year</p>
                                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-lg text-slate-700 font-medium text-sm">

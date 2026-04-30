@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, TrendingUp, ShieldCheck } from 'lucide-react';
+import { Mail, Lock, ArrowRight, TrendingUp, ShieldCheck, Calculator } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { StaggerContainer } from '../components/Animations';
 import Button from '../components/Button';
@@ -165,10 +165,19 @@ const Login = () => {
             </form>
           </StaggerContainer>
 
-          <div className="mt-8 pt-6 border-t border-slate-100 text-center">
+          <div className="mt-8 pt-6 border-t border-slate-100 text-center space-y-4">
             <p className="text-slate-500 text-sm">
               Don't have an account? <Link to="/register" className="text-primary font-semibold hover:text-primary-dark transition-colors hover:underline">Create account</Link>
             </p>
+            <div className="pt-2">
+              <Link 
+                to="/tax-estimate" 
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 transition-all border border-primary/10"
+              >
+                <Calculator size={16} />
+                Try Guest Tax Calculator
+              </Link>
+            </div>
           </div>
         </div>
       </div>

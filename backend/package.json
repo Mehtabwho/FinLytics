@@ -5,7 +5,6 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    
     "test-openrouter": "node scripts/test-openrouter.js",
     "test-ai-direct": "node scripts/invoke-ai-direct.js",
     "list-openrouter-models": "node scripts/list-openrouter-models.js",
@@ -16,7 +15,6 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
@@ -24,7 +22,8 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.0.2",
-    "morgan": "^1.10.1"
+    "morgan": "^1.10.1",
+    "rss-parser": "^3.13.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"

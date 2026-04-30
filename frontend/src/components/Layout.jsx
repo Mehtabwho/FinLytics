@@ -15,7 +15,8 @@ import {
   Bell,
   Search,
   ChevronDown,
-  Percent
+  Percent,
+  Target
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -30,6 +31,7 @@ const Layout = () => {
     { path: '/expenses', label: 'Expenses', icon: <TrendingDown size={20} /> },
     { path: '/tax', label: 'Tax Manager', icon: <Calculator size={20} /> },
     { path: '/tax-rebate', label: 'Tax Rebate', icon: <Percent size={20} /> },
+    { path: '/goals', label: 'Financial Goals', icon: <Target size={20} /> },
     { path: '/reports', label: 'Reports', icon: <BarChart3 size={20} /> },
     { path: '/chat', label: 'AI Assistant', icon: <MessageSquare size={20} /> },
   ];

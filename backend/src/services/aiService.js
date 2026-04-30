@@ -198,10 +198,9 @@ const explainTax = async (taxData) => {
     3. Any missing data warnings.
     4. Legal tax-saving suggestions (advisory).
     
-    Keep it professional and helpful.`;
-    
+    Keep it concise and helpful.`;
     return await generateContent(prompt);
-}
+};
 
 const getInvestmentInsights = async (financialData) => {
     const prompt = `Analyze this financial summary:
@@ -259,11 +258,32 @@ Return only valid JSON with this schema:
   return result;
 }
 
+const generateGoalInsights = async (goal, incomeData, expenseData) => {
+  const prompt = `Analyze this financial goal and the user's current financial situation:
+  Goal: ${JSON.stringify(goal)}
+  Total Income: ${incomeData.reduce((sum, inc) => sum + inc.amount, 0)}
+  Total Expenses: ${expenseData.reduce((sum, exp) => sum + exp.amount, 0)}
+  Recent Transactions: ${JSON.stringify([...incomeData, ...expenseData].slice(-5))}
+
+  Please provide:
+  1. Monthly savings needed to reach the goal within a reasonable timeframe.
+  2. Estimated time (in months) to achieve the goal based on current net savings (Income - Expenses).
+  3. 2-3 simple, actionable suggestions to achieve this goal faster.
+
+  Return the response in a friendly, encouraging tone. Focus on the BDT currency context if applicable.
+  Keep it short (max 150 words).`;
+
+  return await generateContent(prompt);
+};
+
 module.exports = {
+  generateContent,
+  generateJSON,
   classifyExpense,
   parseNaturalLanguage,
   explainTax,
   getInvestmentInsights,
   chatWithAI,
-  getTaxRebateAdvisorInsights
+  getTaxRebateAdvisorInsights,
+  generateGoalInsights
 };

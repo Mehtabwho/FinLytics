@@ -8,6 +8,8 @@ import Income from './pages/Income';
 import Expenses from './pages/Expenses';
 import Tax from './pages/Tax';
 import TaxRebate from './pages/TaxRebate';
+import Goals from './pages/Goals';
+import GuestTaxCalculator from './pages/GuestTaxCalculator';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
@@ -22,6 +24,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/tax-estimate" element={<GuestTaxCalculator />} />
           
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
@@ -30,6 +33,7 @@ function App() {
               <Route path="/expenses" element={<Expenses />} />
               <Route path="/tax" element={<Tax />} />
               <Route path="/tax-rebate" element={<TaxRebate />} />
+              <Route path="/goals" element={<Goals />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/chat" element={<Chat />} />
               <Route path="/profile" element={<Profile />} />

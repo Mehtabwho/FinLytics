@@ -2,15 +2,17 @@ import { useState, useEffect, useMemo } from 'react';
 import api from '../api/axios';
 import { useFinancialYear } from '../context/FinancialYearContext';
 import { motion } from 'framer-motion';
-import { Plus, Calendar, Trash2, X, Receipt, Tag, Search, TrendingDown, DollarSign } from 'lucide-react';
+import { Plus, Calendar, Trash2, X, Receipt, Tag, Search, TrendingDown, DollarSign, Upload } from 'lucide-react';
 import { Card } from '../components/Card';
 import { DataTable } from '../components/DataTable';
 import { PageTransition, StaggerContainer } from '../components/Animations';
 import Button from '../components/Button';
+import DocumentUploadModal from '../components/DocumentUploadModal';
 
 const Expenses = () => {
   const [expenses, setExpenses] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showOCRModal, setShowOCRModal] = useState(false);
   const [naturalLanguageMode, setNaturalLanguageMode] = useState(false);
   const [formData, setFormData] = useState({ category: '', amount: '', date: '', description: '', isDeductible: true });
   const [nlText, setNlText] = useState('');
@@ -118,6 +120,14 @@ const Expenses = () => {
         
         <div className="flex flex-wrap gap-3">
             <Button 
+                onClick={() => setShowOCRModal(true)}
+                variant="secondary"
+                className="flex items-center gap-2"
+            >
+                <Upload size={20} />
+                <span>Upload Receipt</span>
+            </Button>
+            <Button 
                 onClick={() => setShowModal(true)}
                 variant="danger"
                 className="flex items-center gap-2"
@@ -206,135 +216,138 @@ const Expenses = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden"
           >
-            <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-slate-100/50">
-              <h2 className="text-xl font-bold text-slate-800">Add Expense</h2>
-              <motion.button 
-                whileHover={{ rotate: 90 }}
-                onClick={() => setShowModal(false)} 
-                className="text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                  <X size={24} />
-              </motion.button>
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <Plus className="text-red-500" />
+                {naturalLanguageMode ? 'AI Smart Entry' : 'Manual Entry'}
+              </h3>
+              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <X size={24} />
+              </button>
             </div>
 
-            <div className="p-6">
-                <div className="mb-6 flex justify-end">
-                    <button 
-                        onClick={() => setNaturalLanguageMode(!naturalLanguageMode)} 
-                        className={`text-sm flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors font-medium ${
-                            naturalLanguageMode 
-                                ? 'bg-indigo-100 text-indigo-700' 
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                    >
-                        {naturalLanguageMode ? 'Switch to Manual Input' : 'Use AI for Text Input'}
-                    </button>
-                </div>
+            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+              <div className="flex gap-2 p-1 bg-slate-100 rounded-xl mb-4">
+                <button 
+                  type="button"
+                  onClick={() => setNaturalLanguageMode(false)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${!naturalLanguageMode ? 'bg-white shadow-sm text-primary' : 'text-slate-500'}`}
+                >
+                  Manual
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => setNaturalLanguageMode(true)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${naturalLanguageMode ? 'bg-white shadow-sm text-primary' : 'text-slate-500'}`}
+                >
+                  AI Voice/Text
+                </button>
+              </div>
 
-                <form onSubmit={handleSubmit}>
-                {naturalLanguageMode ? (
-                    <div className="mb-6">
-                    <label className="block text-slate-700 font-medium mb-2">Describe your expense</label>
-                    <textarea
-                        className="w-full border border-slate-200 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-slate-700 leading-relaxed resize-none bg-slate-50 focus:bg-white transition-colors"
-                        placeholder='e.g. "Paid 20,000 taka for office rent yesterday"'
-                        rows="4"
-                        value={nlText}
-                        onChange={(e) => setNlText(e.target.value)}
+              {naturalLanguageMode ? (
+                <div className="space-y-4">
+                   <label className="block text-sm font-medium text-slate-700 mb-1">Tell us about your expense</label>
+                   <textarea
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800 placeholder:text-slate-400"
+                    placeholder="e.g. Spent 500 on transport today"
+                    rows="4"
+                    value={nlText}
+                    onChange={(e) => setNlText(e.target.value)}
+                    required
+                  />
+                  <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                    <TrendingDown size={12} /> AI will automatically extract amount, date, and category.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+                      placeholder="e.g. Rent, Marketing, Inventory"
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Amount (৳)</label>
+                      <input
+                        type="number"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+                        placeholder="0.00"
+                        value={formData.amount}
+                        onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                         required
-                    ></textarea>
-                    <p className="text-xs text-slate-400 mt-2">✨ AI will automatically extract amount, date, and category.</p>
+                      />
                     </div>
-                ) : (
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
-                                <input
-                                type="text"
-                                className="w-full border border-slate-200 p-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                placeholder="e.g. Rent, Utilities"
-                                value={formData.category}
-                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                />
-                                <p className="text-xs text-slate-400 mt-1">Leave empty for AI suggestion</p>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Amount</label>
-                                <input
-                                type="number"
-                                className="w-full border border-slate-200 p-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                placeholder="0.00"
-                                value={formData.amount}
-                                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                                required
-                                />
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
-                            <input
-                            type="date"
-                            className="w-full border border-slate-200 p-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                            value={formData.date}
-                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                            required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                            <input
-                            type="text"
-                            className="w-full border border-slate-200 p-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                            placeholder="Optional details..."
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="pt-2">
-                             <label className="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
-                                <input 
-                                    type="checkbox" 
-                                    checked={formData.isDeductible} 
-                                    onChange={(e) => setFormData({...formData, isDeductible: e.target.checked})}
-                                    className="w-5 h-5 text-primary rounded focus:ring-primary/50 border-gray-300"
-                                />
-                                <div>
-                                    <span className="block text-sm font-medium text-slate-700">Tax Deductible</span>
-                                    <span className="block text-xs text-slate-500">This expense reduces your taxable income</span>
-                                </div>
-                            </label>
-                        </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
+                      <input
+                        type="date"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+                        value={formData.date}
+                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                        required
+                      />
                     </div>
-                )}
-                
-                <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-slate-100">
-                    <button 
-                        type="button" 
-                        onClick={() => setShowModal(false)} 
-                        className="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl font-medium transition-colors"
-                    >
-                        Cancel
-                    </button>
-                    <Button 
-                        type="submit" 
-                        isLoading={loading}
-                        variant="danger"
-                    >
-                        Save Expense
-                    </Button>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Description (Optional)</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+                      placeholder="Add more details..."
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="isDeductible"
+                      checked={formData.isDeductible}
+                      onChange={(e) => setFormData({ ...formData, isDeductible: e.target.checked })}
+                      className="w-4 h-4 text-primary focus:ring-primary border-slate-300 rounded"
+                    />
+                    <label htmlFor="isDeductible" className="text-sm text-slate-600">This expense is tax deductible</label>
+                  </div>
                 </div>
-                </form>
-            </div>
+              )}
+
+              <div className="pt-4 flex gap-3">
+                <Button 
+                  type="button" 
+                  variant="secondary" 
+                  className="flex-1"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  variant="danger"
+                  className="flex-1" 
+                  isLoading={loading}
+                >
+                  Save Entry
+                </Button>
+              </div>
+            </form>
           </motion.div>
         </div>
       )}
+
+      <DocumentUploadModal 
+        isOpen={showOCRModal} 
+        onClose={() => setShowOCRModal(false)} 
+        onSuccess={fetchExpenses}
+      />
     </div>
     </PageTransition>
   );

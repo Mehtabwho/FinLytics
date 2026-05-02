@@ -2,15 +2,17 @@ import { useState, useEffect, useMemo } from 'react';
 import api from '../api/axios';
 import { useFinancialYear } from '../context/FinancialYearContext';
 import { motion } from 'framer-motion';
-import { Plus, Calendar, DollarSign, X, Trash2, TrendingUp, Search, Filter } from 'lucide-react';
+import { Plus, Calendar, DollarSign, X, Trash2, TrendingUp, Search, Filter, Upload } from 'lucide-react';
 import { Card } from '../components/Card';
 import { DataTable } from '../components/DataTable';
 import { PageTransition, StaggerContainer } from '../components/Animations';
 import Button from '../components/Button';
+import DocumentUploadModal from '../components/DocumentUploadModal';
 
 const Income = () => {
   const [incomes, setIncomes] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showOCRModal, setShowOCRModal] = useState(false);
   const [naturalLanguageMode, setNaturalLanguageMode] = useState(false);
   const [formData, setFormData] = useState({ source: '', amount: '', date: '', description: '' });
   const [nlText, setNlText] = useState('');
@@ -113,6 +115,13 @@ const Income = () => {
         </div>
         
         <div className="flex flex-wrap gap-3">
+             <Button 
+                variant="outline" 
+                onClick={() => setShowOCRModal(true)} 
+                icon={<Upload size={18} />}
+             >
+                Upload Slip
+             </Button>
              <Button onClick={() => setShowModal(true)} icon={<Plus size={18} />}>
                 Add Income
              </Button>
@@ -197,119 +206,126 @@ const Income = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden"
           >
-            <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-slate-100/50">
-              <h2 className="text-xl font-bold text-slate-800">Add Income</h2>
-              <motion.button 
-                whileHover={{ rotate: 90 }}
-                onClick={() => setShowModal(false)} 
-                className="text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                  <X size={24} />
-              </motion.button>
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <Plus className="text-primary" />
+                {naturalLanguageMode ? 'AI Smart Entry' : 'Manual Entry'}
+              </h3>
+              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <X size={24} />
+              </button>
             </div>
 
-            <div className="p-6">
-                <div className="mb-6 flex justify-end">
-                    <button 
-                        onClick={() => setNaturalLanguageMode(!naturalLanguageMode)} 
-                        className={`text-sm flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors font-medium ${
-                            naturalLanguageMode 
-                                ? 'bg-indigo-100 text-indigo-700' 
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                    >
-                        {naturalLanguageMode ? 'Switch to Manual Input' : 'Use AI for Text Input'}
-                    </button>
-                </div>
+            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+              <div className="flex gap-2 p-1 bg-slate-100 rounded-xl mb-4">
+                <button 
+                  type="button"
+                  onClick={() => setNaturalLanguageMode(false)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${!naturalLanguageMode ? 'bg-white shadow-sm text-primary' : 'text-slate-500'}`}
+                >
+                  Manual
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => setNaturalLanguageMode(true)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${naturalLanguageMode ? 'bg-white shadow-sm text-primary' : 'text-slate-500'}`}
+                >
+                  AI Voice/Text
+                </button>
+              </div>
 
-                <form onSubmit={handleSubmit}>
-                {naturalLanguageMode ? (
-                    <div className="mb-6">
-                    <label className="block text-slate-700 font-medium mb-2">Describe your income</label>
-                    <textarea
-                        className="w-full border border-slate-200 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-slate-700 leading-relaxed resize-none bg-slate-50 focus:bg-white transition-colors"
-                        placeholder='e.g. "Received 50,000 taka from ABC Corp for consulting services today"'
-                        rows="4"
-                        value={nlText}
-                        onChange={(e) => setNlText(e.target.value)}
+              {naturalLanguageMode ? ((
+                <div className="space-y-4">
+                   <label className="block text-sm font-medium text-slate-700 mb-1">Tell us about your income</label>
+                   <textarea
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800 placeholder:text-slate-400"
+                    placeholder="e.g. Received 50,000 as monthly salary today"
+                    rows="4"
+                    value={nlText}
+                    onChange={(e) => setNlText(e.target.value)}
+                    required
+                  />
+                  <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                    <TrendingUp size={12} /> AI will automatically extract amount, date, and source.
+                  </p>
+                </div>
+              )) : (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Source</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+                      placeholder="e.g. Monthly Salary"
+                      value={formData.source}
+                      onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Amount (৳)</label>
+                      <input
+                        type="number"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+                        placeholder="0.00"
+                        value={formData.amount}
+                        onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                         required
-                    ></textarea>
-                    <p className="text-xs text-slate-400 mt-2">✨ AI will automatically extract amount, date, and source.</p>
+                      />
                     </div>
-                ) : (
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Source</label>
-                                <input
-                                type="text"
-                                className="w-full border border-slate-200 p-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                placeholder="e.g. Salary, Business"
-                                value={formData.source}
-                                onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                                required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Amount</label>
-                                <input
-                                type="number"
-                                className="w-full border border-slate-200 p-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                placeholder="0.00"
-                                value={formData.amount}
-                                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                                required
-                                />
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
-                            <input
-                            type="date"
-                            className="w-full border border-slate-200 p-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                            value={formData.date}
-                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                            required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                            <input
-                            type="text"
-                            className="w-full border border-slate-200 p-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                            placeholder="Optional details..."
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            />
-                        </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
+                      <input
+                        type="date"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+                        value={formData.date}
+                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                        required
+                      />
                     </div>
-                )}
-                
-                <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-slate-100">
-                    <button 
-                        type="button" 
-                        onClick={() => setShowModal(false)} 
-                        className="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl font-medium transition-colors"
-                    >
-                        Cancel
-                    </button>
-                    <Button 
-                        type="submit" 
-                        isLoading={loading}
-                    >
-                        Save Record
-                    </Button>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Description (Optional)</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+                      placeholder="Add more details..."
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    />
+                  </div>
                 </div>
-                </form>
-            </div>
+              )}
+
+              <div className="pt-4 flex gap-3">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="flex-1" 
+                  isLoading={loading}
+                >
+                  Save Entry
+                </Button>
+              </div>
+            </form>
           </motion.div>
         </div>
       )}
+      <DocumentUploadModal 
+        isOpen={showOCRModal} 
+        onClose={() => setShowOCRModal(false)} 
+        onSuccess={fetchIncomes}
+      />
       </div>
     </PageTransition>
   );

@@ -9,6 +9,7 @@ const expenseRoutes = require('./routes/expenseRoutes');
 const taxRoutes = require('./routes/taxRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const goalRoutes = require('./routes/goalRoutes');
+const ocrRoutes = require('./routes/ocrRoutes');
 const publicTaxRoutes = require('./routes/publicTaxRoutes');
 
 const app = express();
@@ -26,6 +27,7 @@ app.use('/api/expenses', expenseRoutes);
 app.use('/api/tax', taxRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/goals', goalRoutes);
+app.use('/api/ocr', ocrRoutes);
 app.use('/api/public', publicTaxRoutes);
 
 app.get('/', (req, res) => {

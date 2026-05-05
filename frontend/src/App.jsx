@@ -22,13 +22,13 @@ function App() {
       <AuthProvider>
         <FinancialYearProvider>
         <Routes>
+          <Route path="/" element={<GuestTaxCalculator />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/tax-estimate" element={<GuestTaxCalculator />} />
           
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/income" element={<Income />} />
               <Route path="/expenses" element={<Expenses />} />
               <Route path="/tax" element={<Tax />} />

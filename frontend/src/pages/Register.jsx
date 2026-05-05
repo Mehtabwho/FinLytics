@@ -29,7 +29,7 @@ const Register = () => {
     setIsLoading(true);
     try {
       await register(formData);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
@@ -92,8 +92,8 @@ const Register = () => {
                   <TrendingUp className="text-secondary" size={28} />
                </div>
             </div>
-            <h2 className="text-3xl font-bold text-slate-800 mb-2">Create Account</h2>
-            <p className="text-slate-500">Get started with FinLytics in seconds.</p>
+            <h2 className="text-3xl font-bold text-slate-800 mb-2">Unlock Premium Insights</h2>
+            <p className="text-slate-500">Create an account to track taxes and get AI advice.</p>
           </div>
 
           {error && (
@@ -239,19 +239,10 @@ const Register = () => {
             </form>
           </StaggerContainer>
 
-          <div className="mt-6 pt-6 border-t border-slate-100 text-center space-y-4">
+          <div className="mt-6 pt-6 border-t border-slate-100 text-center">
             <p className="text-slate-500 text-sm">
               Already have an account? <Link to="/login" className="text-primary font-semibold hover:text-primary-dark transition-colors hover:underline">Sign in</Link>
             </p>
-            <div className="pt-2">
-              <Link 
-                to="/tax-estimate" 
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 transition-all border border-primary/10"
-              >
-                <Calculator size={16} />
-                Try Guest Tax Calculator
-              </Link>
-            </div>
           </div>
         </div>
       </div>

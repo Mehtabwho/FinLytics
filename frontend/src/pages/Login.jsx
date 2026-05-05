@@ -20,7 +20,7 @@ const Login = () => {
     setIsLoading(true);
     try {
       await login(email, password);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError('Invalid email or password. Please try again.');
     } finally {
@@ -83,8 +83,8 @@ const Login = () => {
                   <TrendingUp className="text-secondary" size={28} />
                </div>
             </div>
-            <h2 className="text-3xl font-bold text-slate-800 mb-2">Welcome back</h2>
-            <p className="text-slate-500">Please enter your details to sign in.</p>
+            <h2 className="text-3xl font-bold text-slate-800 mb-2">Unlock Full Features</h2>
+            <p className="text-slate-500">Sign in to access AI insights and financial history.</p>
           </div>
 
           {error && (
@@ -165,19 +165,10 @@ const Login = () => {
             </form>
           </StaggerContainer>
 
-          <div className="mt-8 pt-6 border-t border-slate-100 text-center space-y-4">
+          <div className="mt-8 pt-6 border-t border-slate-100 text-center">
             <p className="text-slate-500 text-sm">
               Don't have an account? <Link to="/register" className="text-primary font-semibold hover:text-primary-dark transition-colors hover:underline">Create account</Link>
             </p>
-            <div className="pt-2">
-              <Link 
-                to="/tax-estimate" 
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 transition-all border border-primary/10"
-              >
-                <Calculator size={16} />
-                Try Guest Tax Calculator
-              </Link>
-            </div>
           </div>
         </div>
       </div>

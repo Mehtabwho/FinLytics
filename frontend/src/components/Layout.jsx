@@ -26,7 +26,7 @@ const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const navItems = [
-    { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+    { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { path: '/income', label: 'Income', icon: <TrendingUp size={20} /> },
     { path: '/expenses', label: 'Expenses', icon: <TrendingDown size={20} /> },
     { path: '/tax', label: 'Tax Manager', icon: <Calculator size={20} /> },
@@ -44,7 +44,7 @@ const Layout = () => {
         animate={{ x: 0 }}
         className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-primary text-white shadow-2xl flex flex-col z-20 transition-all duration-300 ease-in-out relative`}
       >
-        <div className="p-6 flex items-center gap-3 border-b border-white/10">
+        <Link to="/dashboard" className="p-6 flex items-center gap-3 border-b border-white/10 hover:bg-white/5 transition-colors">
             <div className="w-8 h-8 bg-secondary rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-secondary/20 shrink-0">
               F
             </div>
@@ -58,7 +58,7 @@ const Layout = () => {
                   <p className="text-xs text-slate-400">AI Finance Manager</p>
               </motion.div>
             )}
-        </div>
+        </Link>
         
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto sidebar-scroll">
           {navItems.map((item) => (

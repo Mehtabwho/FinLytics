@@ -1,11 +1,12 @@
+const FinancialAnalyzer = require('../utils/financialAnalyzer');
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const SITE_URL = 'http://localhost:5173'; // Update with your site URL
 const SITE_NAME = 'FinLytics';
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-lite-preview-02-05:free';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-8b-instruct:free';
 
 // Only OpenRouter is used in this deployment; Google Gemini support has been removed.
 
-const callOpenRouter = async (messages) => {
+const callOpenRouter = async (messages, maxTokens = 800) => {
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -18,7 +19,7 @@ const callOpenRouter = async (messages) => {
       body: JSON.stringify({
         "model": OPENROUTER_MODEL,
         "messages": messages,
-        "max_tokens": 350 // Limit token usage to prevent exceeding credits
+        "max_tokens": maxTokens // Increased token limit for detailed responses
       })
     });
 
@@ -43,13 +44,13 @@ const callOpenRouter = async (messages) => {
 
 // Removed Google Gemini call helper
 
-const generateContent = async (prompt) => {
+const generateContent = async (prompt, maxTokens = 800) => {
     try {
     const messages = [{ role: "user", content: prompt }];
     // Use OpenRouter
     if (OPENROUTER_API_KEY) {
       console.debug('generateContent: using OpenRouter', OPENROUTER_MODEL || '(default)');
-      return await callOpenRouter(messages);
+      return await callOpenRouter(messages, maxTokens);
     }
     throw new Error('No AI provider configured (set OPENROUTER_API_KEY)');
     } catch (error) {
@@ -58,14 +59,14 @@ const generateContent = async (prompt) => {
     }
 };
 
-const generateJSON = async (prompt) => {
+const generateJSON = async (prompt, maxTokens = 1000) => {
     const messages = [{ role: "user", content: prompt + " \n\nResponse must be a valid JSON object without markdown formatting." }];
     try {
     let text;
     // Prefer OpenRouter for JSON generation
     if (OPENROUTER_API_KEY) {
       console.debug('generateJSON: using OpenRouter', OPENROUTER_MODEL || '(default)');
-      text = await callOpenRouter(messages);
+      text = await callOpenRouter(messages, maxTokens);
     } else {
       throw new Error('No AI provider configured (set OPENROUTER_API_KEY)');
     }
@@ -188,17 +189,28 @@ const parseNaturalLanguage = async (text) => {
     }
 }
 
-const explainTax = async (taxData) => {
-    const prompt = `Explain this tax calculation for a Bangladeshi SME owner in simple language:
-    ${JSON.stringify(taxData)}
-    
-    Explain:
-    1. The tax-free threshold applied.
-    2. Why tax increased or is zero.
-    3. Any missing data warnings.
-    4. Legal tax-saving suggestions (advisory).
-    
-    Keep it concise and helpful.`;
+const explainTax = async (taxData, financialData = {}) => {
+    const prompt = `You are FinLytics AI, a tax advisor for Bangladeshi taxpayers.
+
+TAX CALCULATION DATA:
+${JSON.stringify(taxData, null, 2)}
+
+${financialData.incomes ? `FINANCIAL CONTEXT:
+- Total Income: ৳${financialData.totalIncome?.toLocaleString() || 'N/A'}
+- Total Expenses: ৳${financialData.totalExpenses?.toLocaleString() || 'N/A'}
+- Savings Rate: ${financialData.savingsRate || 'N/A'}%
+- Tax Ratio: ${financialData.taxRatio || 'N/A'}%
+` : ''}
+
+GENERATE A PROFESSIONAL, STRUCTURED EXPLANATION:
+1. TAX CALCULATION OVERVIEW (1-2 sentences)
+2. TAX-FREE THRESHOLD EXPLANATION
+3. WHY TAX IS THIS AMOUNT (reference specific numbers)
+4. TAX EFFICIENCY OBSERVATIONS
+5. NBR-COMPLIANT TAX-SAVING SUGGESTIONS (3-4 specific items)
+6. NEXT STEPS
+
+Disclaimer: This is advisory guidance, not legal tax advice. Consult a tax professional.`;
     return await generateContent(prompt);
 };
 
@@ -216,46 +228,124 @@ const getInvestmentInsights = async (financialData) => {
     return await generateContent(prompt);
 }
 
-const chatWithAI = async (message, context) => {
-    const prompt = `You are FinLytics AI, a helpful assistant for Bangladeshi business owners.
-    Context: ${JSON.stringify(context)}
-    
-    User: ${message}
-    
-    Answer the user's question based on the context provided. Guide them on using the system if needed.`;
+const chatWithAI = async (message, context, financialAnalysis = null) => {
+    let prompt = `You are FinLytics AI, an intelligent, context-aware financial co-pilot for Bangladeshi taxpayers and SME owners.
+
+USER PROFILE:
+- Name: ${context.userProfile?.name || 'User'}
+- Business Type: ${context.userProfile?.businessType || 'Not specified'}
+- Taxpayer Category: ${context.userProfile?.taxpayerCategory || 'General'}
+
+FINANCIAL SUMMARY (IF AVAILABLE):
+- Total Income: ৳${context.financialSummary?.totalIncome?.toLocaleString() || 'N/A'}
+- Total Expenses: ৳${context.financialSummary?.totalExpenses?.toLocaleString() || 'N/A'}
+${financialAnalysis ? `
+DEEP FINANCIAL INSIGHTS:
+- Financial Health Score: ${financialAnalysis.financialHealthScore}/100 (${financialAnalysis.healthStatus})
+- Savings Rate: ${financialAnalysis.metrics.savingsRate}%
+- Emergency Fund: ${financialAnalysis.metrics.emergencyFundMonths} months
+- Top Expense Category: ${financialAnalysis.metrics.topExpenseCategory.name}
+` : ''}
+
+IMPORTANT RULES FOR YOU:
+- Always be professional, analytical, and encouraging
+- Reference specific user data when answering questions
+- Never calculate taxes or financial metrics - all calculations are done by the system
+- Provide personalized, actionable advice tailored to their situation
+- Use Bangladeshi context (BDT, NBR rules, local investment options)
+- If you don't know the answer, guide them to use the system's features
+- Keep responses concise but comprehensive
+
+USER MESSAGE: ${message}
+
+Answer the user's question based on the context provided.`;
     
     return await generateContent(prompt);
 }
 
-const getTaxRebateAdvisorInsights = async ({ incomeTax, taxYear }) => {
+const getTaxRebateAdvisorInsights = async ({ incomeTax, taxYear, financialContext = {} }) => {
+  // Fallback data if AI fails
+  const fallbackData = {
+    summary: "Based on your income tax profile, you have several tax rebate opportunities through NBR-approved investments. Consider these options to optimize your tax liability.",
+    suggestions: [
+      {
+        option: "Government Pension Fund",
+        suggestedAmount: 50000,
+        estimatedRebateEfficiency: "High",
+        riskLevel: "Low risk",
+        liquidityLevel: "Low",
+        suitableBecause: ["Stable long-term investment", "NBR-approved for tax rebate", "Builds retirement reserve"],
+        expectedImpact: ["Reduces taxable income", "Provides retirement security", "Low risk investment"],
+        recommendationConfidence: "High"
+      },
+      {
+        option: "DPS (Deposit Pension Scheme)",
+        suggestedAmount: 30000,
+        estimatedRebateEfficiency: "High",
+        riskLevel: "Low risk",
+        liquidityLevel: "Medium",
+        suitableBecause: ["Monthly savings plan", "Good for disciplined savings", "Tax-efficient"],
+        expectedImpact: ["Regular savings habit", "Tax rebate benefits", "Medium liquidity"],
+        recommendationConfidence: "High"
+      },
+      {
+        option: "Sanchaypatra",
+        suggestedAmount: 25000,
+        estimatedRebateEfficiency: "Medium",
+        riskLevel: "Low risk",
+        liquidityLevel: "Medium",
+        suitableBecause: ["Government-backed security", "Stable returns", "Easy to invest"],
+        expectedImpact: ["Safe investment option", "Tax rebate eligibility", "Stable returns"],
+        recommendationConfidence: "Medium"
+      }
+    ],
+    disclaimer: "This is advisory guidance only. Consult a qualified tax professional before making investment decisions."
+  };
+
   if (!OPENROUTER_API_KEY) {
-    throw new Error('AI Service Unavailable');
+    console.log('AI Service unavailable, using fallback data');
+    return fallbackData;
   }
-  const prompt = `You are an AI Tax Rebate Advisor for Bangladesh.
-Income Tax: ${incomeTax}
-Tax Year: ${taxYear}
+  
+  try {
+    // SIMPLE, RELIABLE JSON PROMPT
+    const prompt = `You are FinLytics Tax Rebate Advisor.
 
-Rules:
-- Do not calculate tax or rebate.
-- Do not reference rebate caps, limits, or remaining capacity.
-- Do not guarantee savings.
-- Do not override NBR rules.
-- Base suggestions only on the user's income tax level.
-- Suggest practical, NBR-compliant investment options commonly considered by similar taxpayers.
+USER DATA:
+- Income Tax: ৳${incomeTax?.toLocaleString() || '0'}
+- Savings Rate: ${financialContext.savingsRate || 0}%
+- Monthly Savings: ৳${financialContext.monthlySavings?.toLocaleString() || '0'}
 
-Return only valid JSON with this schema:
+RESPOND WITH VALID JSON ONLY:
 {
-  "summary": string,
+  "summary": "Brief summary of tax rebate opportunities",
   "suggestions": [
-    { "option": string, "suggestedAmount": number, "reason": string, "risk": "Low risk" | "Medium risk" | "High risk" }
+    {
+      "option": "Investment option name",
+      "suggestedAmount": 50000,
+      "estimatedRebateEfficiency": "High",
+      "riskLevel": "Low risk",
+      "liquidityLevel": "Medium",
+      "suitableBecause": ["Matches your savings", "Good for tax savings"],
+      "expectedImpact": ["Reduces taxable income", "Builds reserve"],
+      "recommendationConfidence": "High"
+    }
   ],
-  "disclaimer": string
-}`;
-  const result = await generateJSON(prompt);
-  if (!result || !result.summary || !Array.isArray(result.suggestions)) {
-    throw new Error('AI Service Unavailable');
+  "disclaimer": "Advisory guidance only. Consult a tax professional."
+}
+
+Generate 3 simple recommendations.`;
+    
+    const result = await generateJSON(prompt, 1000);
+    if (!result || !result.summary || !Array.isArray(result.suggestions)) {
+      console.log('AI response invalid, using fallback data');
+      return fallbackData;
+    }
+    return result;
+  } catch (error) {
+    console.error('Tax Rebate Advisor AI failed, using fallback:', error);
+    return fallbackData;
   }
-  return result;
 }
 
 const generateGoalInsights = async (goal, incomeData, expenseData) => {
@@ -276,6 +366,87 @@ const generateGoalInsights = async (goal, incomeData, expenseData) => {
   return await generateContent(prompt);
 };
 
+/**
+ * Generate AI-powered financial insights using structured analysis from FinancialAnalyzer
+ * @param {Object} params - Analysis parameters
+ * @returns {Object} AI insights and recommendations
+ */
+const generateFinancialInsights = async ({ 
+  incomes = [], 
+  expenses = [], 
+  totalTax = 0, 
+  totalRebate = 0,
+  maxRebateCapacity = 0,
+  previousExpenses = [],
+  goals = [],
+  userProfile = {}
+}) => {
+  // Step 1: Get deterministic financial analysis
+  const analysis = FinancialAnalyzer.analyze({
+    incomes,
+    expenses,
+    totalTax,
+    totalRebate,
+    maxRebateCapacity,
+    previousExpenses,
+    goals,
+  });
+
+  // Fallback AI insights if AI fails
+  const fallbackInsights = `Financial Health Overview:
+Your financial health is ${analysis.healthStatus} with a score of ${analysis.financialHealthScore}/100. You have a savings rate of ${analysis.metrics.savingsRate}% and your top expense is ${analysis.metrics.topExpenseCategory.name}.
+
+Key Observations:
+• Total Income: ৳${analysis.metrics.totalIncome.toLocaleString()}
+• Total Expenses: ৳${analysis.metrics.totalExpense.toLocaleString()}
+• Net Savings: ৳${analysis.metrics.savings.toLocaleString()}
+• Savings Rate: ${analysis.metrics.savingsRate}%
+
+Recommendations:
+1. Review your ${analysis.metrics.topExpenseCategory.name} expenses to identify potential savings
+2. Aim to maintain a savings rate of at least 20% for long-term financial stability
+3. Consider tax-efficient investment options to optimize your tax liability
+
+Disclaimer: This is advisory guidance, not financial advice. Consult a qualified professional.`;
+
+  try {
+    // Step 2: Prepare SIMPLE, concise prompt for better reliability
+    const prompt = `You are FinLytics AI, a financial advisor for Bangladeshi users.
+
+FINANCIAL DATA:
+- Total Income: ৳${analysis.metrics.totalIncome.toLocaleString()}
+- Total Expenses: ৳${analysis.metrics.totalExpense.toLocaleString()}
+- Net Savings: ৳${analysis.metrics.savings.toLocaleString()}
+- Savings Rate: ${analysis.metrics.savingsRate}%
+- Expense Ratio: ${analysis.metrics.expenseRatio}%
+- Financial Health Score: ${analysis.financialHealthScore}/100 (${analysis.healthStatus})
+- Top Expense: ${analysis.metrics.topExpenseCategory.name} (৳${analysis.metrics.topExpenseCategory.amount.toLocaleString()})
+
+RULES:
+- Use professional, concise language
+- Reference specific numbers
+- Give 3-4 actionable recommendations
+- Keep under 500 words
+- Use Bangladeshi context
+- Disclaimer: Advisory guidance only`;
+
+    const aiResponse = await generateContent(prompt, 800);
+
+    // Return both the structured analysis and AI-generated insights
+    return {
+      analysis, // Deterministic metrics
+      aiInsights: aiResponse || fallbackInsights, // AI-generated explanation or fallback
+    };
+  } catch (error) {
+    console.error('AI generation failed, using fallback:', error);
+    // Return fallback insights if AI fails
+    return {
+      analysis,
+      aiInsights: fallbackInsights,
+    };
+  }
+};
+
 module.exports = {
   generateContent,
   generateJSON,
@@ -285,5 +456,7 @@ module.exports = {
   getInvestmentInsights,
   chatWithAI,
   getTaxRebateAdvisorInsights,
-  generateGoalInsights
+  generateGoalInsights,
+  generateFinancialInsights,
+  FinancialAnalyzer, // Export for direct use in controllers
 };

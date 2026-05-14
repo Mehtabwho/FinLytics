@@ -1,9 +1,11 @@
 import { createContext, useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -30,17 +32,20 @@ export const AuthProvider = ({ children }) => {
     const { data } = await api.post('/auth/login', { email, password });
     localStorage.setItem('token', data.token);
     setUser(data);
+    navigate('/dashboard');
   };
 
   const register = async (userData) => {
     const { data } = await api.post('/auth/register', userData);
     localStorage.setItem('token', data.token);
     setUser(data);
+    navigate('/dashboard');
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
+    navigate('/');
   };
 
   const updateUser = (userData) => {

@@ -7,13 +7,14 @@ export const Button = ({
   className = '',
   disabled = false,
   isLoading = false,
+  fullWidth = false, // Added fullWidth prop
   ...props 
 }) => {
   const variants = {
-    primary: 'bg-primary hover:bg-primary-light text-white shadow-lg shadow-blue-900/20',
-    secondary: 'bg-slate-100 hover:bg-slate-200 text-slate-900',
-    danger: 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20',
-    ghost: 'text-slate-600 hover:bg-slate-100',
+    primary: 'gradient-btn text-white shadow-lg shadow-cyan-500/20',
+    secondary: 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700',
+    danger: 'bg-red-500/80 hover:bg-red-500 text-white shadow-lg shadow-red-500/20',
+    ghost: 'text-slate-300 hover:bg-slate-800 hover:text-white border border-transparent hover:border-slate-700',
   };
 
   const sizes = {
@@ -30,9 +31,9 @@ export const Button = ({
       className={`
         font-medium rounded-xl transition-all duration-200
         disabled:opacity-50 disabled:cursor-not-allowed
-        ${variants[variant]} ${sizes[size]} ${className}
+        ${variants[variant]} ${sizes[size]} ${fullWidth ? 'w-full' : ''} ${className}
       `}
-      {...props}
+      {...props} // Spread remaining props
     >
       {isLoading ? 'Processing...' : children}
     </motion.button>

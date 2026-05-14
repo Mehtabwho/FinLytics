@@ -39,8 +39,29 @@ router.get('/calculate', protect, async (req, res) => {
 // @access  Private
 router.post('/explain', protect, async (req, res) => {
     const { taxData } = req.body;
+    const financialYear = req.query.year || req.user.currentFinancialYear;
+    
     try {
-        const explanation = await explainTax(taxData);
+        // Get financial context for better tax explanation
+        const incomes = await Income.find({ user: req.user._id, financialYear });
+        const expenses = await Expense.find({ user: req.user._id, financialYear });
+        
+        const totalIncome = incomes.reduce((acc, item) => acc + item.amount, 0);
+        const totalExpenses = expenses.reduce((acc, item) => acc + item.amount, 0);
+        const totalTax = taxData.taxPayable || 0;
+        
+        const savings = Math.max(0, totalIncome - totalExpenses - totalTax);
+        const savingsRate = totalIncome > 0 ? (savings / totalIncome) * 100 : 0;
+        const taxRatio = totalIncome > 0 ? (totalTax / totalIncome) * 100 : 0;
+        
+        const explanation = await explainTax(taxData, {
+            incomes,
+            expenses,
+            totalIncome,
+            totalExpenses,
+            savingsRate: Math.round(savingsRate * 10) / 10,
+            taxRatio: Math.round(taxRatio * 10) / 10,
+        });
         res.json({ explanation });
     } catch (error) {
         res.status(500).json({ message: error.message });

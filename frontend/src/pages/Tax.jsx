@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { useFinancialYear } from '../context/FinancialYearContext';
 import { motion } from 'framer-motion';
-import { FileText, Info, Calculator, ShieldCheck, AlertCircle, Download, RefreshCw, TrendingUp } from 'lucide-react';
+import { FileText, Info, Calculator, ShieldCheck, AlertCircle, RefreshCw } from 'lucide-react';
 import { Card } from '../components/Card';
 import { SkeletonCard } from '../components/Skeleton';
 import { PageTransition, StaggerContainer } from '../components/Animations';
@@ -68,13 +68,13 @@ const Tax = () => {
           className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
         >
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent flex items-center gap-3">
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <ShieldCheck className="text-primary" size={28} />
+            <h1 className="text-4xl font-bold gradient-text flex items-center gap-3">
+              <div className="p-3 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
+                <ShieldCheck className="text-cyan-400" size={28} />
               </div>
               Tax Manager
             </h1>
-            <p className="text-slate-500 text-sm mt-2">Automated NBR-compliant tax calculation & insights</p>
+            <p className="text-slate-400 text-sm mt-2">Automated NBR-compliant tax calculation & insights</p>
           </div>
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -88,7 +88,7 @@ const Tax = () => {
               className="flex items-center gap-2"
             >
               <RefreshCw size={18} />
-              <span>Recalculate</span>
+              Recalculate
             </Button>
           </motion.div>
         </motion.div>
@@ -107,39 +107,39 @@ const Tax = () => {
                         <div className="space-y-6">
                           
                             <div>
-                                <p className="text-slate-500 text-sm mb-1">Assessment Year</p>
-                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-lg text-slate-700 font-medium text-sm">
+                                <p className="text-slate-400 text-sm mb-1">Assessment Year</p>
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-800/70 rounded-lg text-slate-300 font-medium text-sm border border-slate-700">
                                     {taxData.assessmentYear || 'N/A'}
                                 </div>
                             </div>
                             <div>
-                                <p className="text-slate-500 text-sm mb-1">Taxpayer Category</p>
-                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-lg text-slate-700 font-medium capitalize text-sm">
+                                <p className="text-slate-400 text-sm mb-1">Taxpayer Category</p>
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-800/70 rounded-lg text-slate-300 font-medium capitalize text-sm border border-slate-700">
                                     {taxData.taxpayerCategory.replace(/_/g, ' ')}
                                 </div>
                             </div>
                             
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <p className="text-slate-500 text-xs uppercase tracking-wider font-semibold mb-1">Total Income</p>
-                                    <p className="font-bold text-slate-800 text-lg">৳{taxData.totalIncome.toLocaleString()}</p>
+                                    <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold mb-1">Total Income</p>
+                                    <p className="font-bold text-slate-100 text-lg">৳{taxData.totalIncome.toLocaleString()}</p>
                                 </div>
                                 <div>
-                                    <p className="text-slate-500 text-xs uppercase tracking-wider font-semibold mb-1">Deductible Exp.</p>
-                                    <p className="font-bold text-red-500 text-lg">-৳{taxData.totalDeductibleExpenses.toLocaleString()}</p>
+                                    <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold mb-1">Deductible Exp.</p>
+                                    <p className="font-bold text-red-400 text-lg">-৳{taxData.totalDeductibleExpenses.toLocaleString()}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 flex flex-col justify-center">
+                        <div className="bg-slate-800/50 p-5 rounded-xl border border-slate-700 flex flex-col justify-center">
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-slate-600 font-medium">Taxable Income</span>
-                                <span className="text-slate-900 font-bold">৳{taxData.taxableIncome.toLocaleString()}</span>
+                                <span className="text-slate-300 font-medium">Taxable Income</span>
+                                <span className="text-slate-100 font-bold">৳{taxData.taxableIncome.toLocaleString()}</span>
                             </div>
-                            <div className="w-full h-px bg-slate-200 my-3"></div>
+                            <div className="w-full h-px bg-slate-700 my-3"></div>
                             <div className="flex justify-between items-center">
-                                <span className="text-primary font-bold text-lg">Net Tax Payable</span>
-                                <span className="text-primary font-bold text-2xl">৳{taxData.taxPayable.toLocaleString()}</span>
+                                <span className="text-cyan-400 font-bold text-lg">Net Tax Payable</span>
+                                <span className="text-cyan-400 font-bold text-2xl">৳{taxData.taxPayable.toLocaleString()}</span>
                             </div>
                         </div>
                     </div>
@@ -147,15 +147,15 @@ const Tax = () => {
 
                 {/* Breakdown Table */}
                 <Card className="overflow-hidden" hover={false}>
-                    <div className="p-5 border-b border-slate-100 bg-white">
-                        <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-                            <FileText size={18} className="text-slate-400" /> 
+                    <div className="p-5 border-b border-slate-700/50">
+                        <h3 className="font-semibold text-slate-100 flex items-center gap-2">
+                            <FileText size={18} className="text-slate-500" /> 
                             Calculation Breakdown (Slab-wise)
                         </h3>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-slate-50/50 border-b border-slate-100 text-slate-600">
+                            <thead className="bg-slate-800/50 border-b border-slate-700 text-slate-300">
                                 <tr>
                                     <th className="p-4 font-semibold whitespace-nowrap">Income Slab</th>
                                     <th className="p-4 font-semibold whitespace-nowrap">Chargeable Amount</th>
@@ -163,26 +163,26 @@ const Tax = () => {
                                     <th className="p-4 font-semibold text-right whitespace-nowrap">Tax Amount</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody className="divide-y divide-slate-700/50">
                                 {taxData.breakdown.map((item, index) => (
-                                    <tr key={index} className="hover:bg-slate-50/50 transition-colors group">
-                                        <td className="p-4 font-medium text-slate-700 whitespace-nowrap">{item.slab}</td>
-                                        <td className="p-4 text-slate-600 whitespace-nowrap">৳{item.amount.toLocaleString()}</td>
+                                    <tr key={index} className="hover:bg-slate-800/30 transition-colors group">
+                                        <td className="p-4 font-medium text-slate-200 whitespace-nowrap">{item.slab}</td>
+                                        <td className="p-4 text-slate-300 whitespace-nowrap">৳{item.amount.toLocaleString()}</td>
                                         <td className="p-4 whitespace-nowrap">
-                                            <span className="px-2.5 py-1 bg-slate-100 rounded-md text-xs font-semibold text-slate-600 border border-slate-200">
+                                            <span className="px-2.5 py-1 bg-slate-700/50 rounded-md text-xs font-semibold text-slate-300 border border-slate-600">
                                                 {(item.rate * 100)}%
                                             </span>
                                         </td>
-                                        <td className="p-4 text-right font-mono font-medium text-slate-700 whitespace-nowrap">
+                                        <td className="p-4 text-right font-mono font-medium text-slate-200 whitespace-nowrap">
                                             ৳{item.tax.toLocaleString()}
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
-                            <tfoot className="bg-slate-50 border-t border-slate-200 font-bold text-slate-800">
+                            <tfoot className="bg-slate-800/70 border-t border-slate-700 font-bold text-slate-100">
                                 <tr>
                                     <td colSpan="3" className="p-4 text-right whitespace-nowrap">Total Tax Payable</td>
-                                    <td className="p-4 text-right text-primary text-lg whitespace-nowrap">৳{taxData.taxPayable.toLocaleString()}</td>
+                                    <td className="p-4 text-right text-cyan-400 text-lg whitespace-nowrap">৳{taxData.taxPayable.toLocaleString()}</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -192,7 +192,7 @@ const Tax = () => {
 
             {/* Right Column: AI Insights */}
             <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="space-y-6">
-                <Card className="bg-gradient-to-br from-primary to-primary-light text-white border-0 relative overflow-hidden" hover={false}>
+                <Card className="bg-gradient-to-br from-cyan-600 to-primary text-white border-0 relative overflow-hidden" hover={false}>
                     <div className="absolute top-0 right-0 p-4 opacity-10">
                         <Info size={100} />
                     </div>
@@ -200,7 +200,7 @@ const Tax = () => {
                     <div className="relative z-10">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="font-bold flex items-center gap-2">
-                                <Info size={20} className="text-secondary" /> AI Tax Insight
+                                <Info size={20} className="text-emerald-400" /> AI Tax Insight
                             </h3>
                             {!explanation && (
                                 <button 
@@ -231,10 +231,10 @@ const Tax = () => {
                 </Card>
 
                 <Card className="p-5" hover={false}>
-                    <h4 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
-                        <AlertCircle size={18} className="text-amber-500" /> Important Note
+                    <h4 className="font-semibold text-slate-100 mb-3 flex items-center gap-2">
+                        <AlertCircle size={18} className="text-amber-400" /> Important Note
                     </h4>
-                    <p className="text-sm text-slate-500 leading-relaxed">
+                    <p className="text-sm text-slate-400 leading-relaxed">
                         This calculation is based on the Finance Act 2024. Please consult with a certified tax practitioner before filing your final return.
                     </p>
                 </Card>

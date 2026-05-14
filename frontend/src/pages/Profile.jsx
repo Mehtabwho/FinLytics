@@ -175,7 +175,7 @@ const Profile = () => {
     } catch (error) {
         setMessage({ type: 'error', text: error.response?.data?.message || 'Update failed' });
     } finally {
-        setSaving(false);
+      setSaving(false);
     }
   };
 
@@ -191,10 +191,10 @@ const Profile = () => {
     <PageTransition>
       <div className="space-y-6 max-w-5xl mx-auto p-6">
         <div className="flex items-center gap-4 mb-8">
-            <div className="w-16 h-16 rounded-full bg-slate-200 animate-pulse" />
+            <div className="w-16 h-16 rounded-full bg-slate-700 animate-pulse" />
             <div className="space-y-2">
-                <div className="h-6 w-48 bg-slate-200 rounded animate-pulse" />
-                <div className="h-4 w-32 bg-slate-200 rounded animate-pulse" />
+                <div className="h-6 w-48 bg-slate-700 rounded animate-pulse" />
+                <div className="h-4 w-32 bg-slate-700 rounded animate-pulse" />
             </div>
         </div>
         <SkeletonCard />
@@ -211,17 +211,17 @@ const Profile = () => {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col md:flex-row items-center gap-6 p-6 bg-white rounded-2xl shadow-sm border border-slate-100"
+          className="flex flex-col md:flex-row items-center gap-6 p-6 glass-card rounded-2xl border border-slate-700"
         >
           <div className="relative group">
             <div 
-              className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg cursor-pointer bg-slate-100 relative"
+              className="w-24 h-24 rounded-full overflow-hidden border-4 border-slate-700 shadow-lg cursor-pointer bg-slate-800/70 relative"
               onClick={handleAvatarClick}
             >
               {avatar ? (
                 <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-slate-400">
+                <div className="w-full h-full flex items-center justify-center text-slate-500">
                   <User size={40} />
                 </div>
               )}
@@ -241,13 +241,13 @@ const Profile = () => {
           </div>
 
           <div className="text-center md:text-left space-y-1">
-            <h1 className="text-2xl font-bold text-slate-800">
+            <h1 className="text-2xl font-bold text-slate-100">
               {personalInfo.firstName} {personalInfo.lastName}
             </h1>
-            <p className="text-slate-500 font-medium flex items-center justify-center md:justify-start gap-2">
+            <p className="text-slate-400 font-medium flex items-center justify-center md:justify-start gap-2">
               <Mail size={14} /> {personalInfo.email}
             </p>
-            <p className="text-xs text-primary bg-primary/10 px-2 py-1 rounded-full inline-block mt-1 font-semibold">
+            <p className="text-xs text-cyan-400 bg-cyan-500/10 px-2 py-1 rounded-full inline-block mt-1 font-semibold border border-cyan-500/20">
               {personalInfo.profession}
             </p>
           </div>
@@ -262,8 +262,8 @@ const Profile = () => {
               exit={{ opacity: 0, height: 0 }}
               className={`p-4 rounded-xl border flex items-center gap-3 ${
                 message.type === 'success' 
-                  ? 'bg-green-50 border-green-200 text-green-700' 
-                  : 'bg-red-50 border-red-200 text-red-700'
+                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+                  : 'bg-red-500/10 border-red-500/20 text-red-400'
               }`}
             >
               {message.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
@@ -282,68 +282,68 @@ const Profile = () => {
             {/* 2. Personal Information */}
             <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
               <Card className="overflow-visible">
-                <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
-                  <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                <div className="flex items-center gap-3 mb-6 border-b border-slate-700/50 pb-4">
+                  <div className="p-2 bg-cyan-500/10 text-cyan-400 rounded-lg border border-cyan-500/20">
                     <User size={20} />
                   </div>
-                  <h2 className="text-lg font-bold text-slate-800">Personal Information</h2>
+                  <h2 className="text-lg font-bold text-slate-100">Personal Information</h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* First Name */}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-slate-700">First Name</label>
+                    <label className="text-sm font-semibold text-slate-300">First Name</label>
                     <input
                       type="text"
                       name="firstName"
                       value={personalInfo.firstName}
                       onChange={handlePersonalChange}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                      className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none transition-all text-slate-100"
                       placeholder="John"
                     />
                   </div>
 
                   {/* Last Name */}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-slate-700">Last Name</label>
+                    <label className="text-sm font-semibold text-slate-300">Last Name</label>
                     <input
                       type="text"
                       name="lastName"
                       value={personalInfo.lastName}
                       onChange={handlePersonalChange}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                      className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none transition-all text-slate-100"
                       placeholder="Doe"
                     />
                   </div>
 
                   {/* Email (Read Only) */}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-slate-700">Email Address</label>
+                    <label className="text-sm font-semibold text-slate-300">Email Address</label>
                     <div className="relative">
-                        <Mail className="absolute left-3.5 top-3 text-slate-400" size={18} />
+                        <Mail className="absolute left-3.5 top-3 text-slate-500" size={18} />
                         <input
                         type="email"
                         value={personalInfo.email}
                         disabled
-                        className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed"
+                        className="w-full pl-10 pr-4 py-2.5 bg-slate-700/70 border border-slate-700 rounded-xl text-slate-500 cursor-not-allowed"
                         />
                     </div>
-                    <p className="text-xs text-slate-400 flex items-center gap-1">
+                    <p className="text-xs text-slate-500 flex items-center gap-1">
                         <Lock size={10} /> Email cannot be changed
                     </p>
                   </div>
 
                   {/* Phone */}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-slate-700">Phone Number</label>
+                    <label className="text-sm font-semibold text-slate-300">Phone Number</label>
                     <div className="relative">
-                        <Phone className="absolute left-3.5 top-3 text-slate-400" size={18} />
+                        <Phone className="absolute left-3.5 top-3 text-slate-500" size={18} />
                         <input
                         type="tel"
                         name="phone"
                         value={personalInfo.phone}
                         onChange={handlePersonalChange}
-                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                        className="w-full pl-10 pr-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none transition-all text-slate-100"
                         placeholder="+8801XXXXXXXXX"
                         />
                     </div>
@@ -351,7 +351,7 @@ const Profile = () => {
 
                   {/* Profession */}
                   <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-sm font-semibold text-slate-700">Profession</label>
+                    <label className="text-sm font-semibold text-slate-300">Profession</label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         {['Job Holder', 'Businessman / Entrepreneur', 'Freelancer', 'Other'].map((option) => (
                             <label 
@@ -359,8 +359,8 @@ const Profile = () => {
                                 className={`
                                     cursor-pointer border rounded-xl p-3 flex flex-col items-center justify-center text-center gap-2 transition-all
                                     ${personalInfo.profession === option 
-                                        ? 'bg-primary/5 border-primary text-primary font-semibold shadow-sm' 
-                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'}
+                                        ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 font-semibold shadow-sm' 
+                                        : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-700/70 hover:border-slate-600'}
                                 `}
                             >
                                 <input 
@@ -383,12 +383,12 @@ const Profile = () => {
             {/* 3. Security & Privacy */}
             <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
                 <Card>
-                    <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+                    <div className="flex items-center justify-between mb-6 border-b border-slate-700/50 pb-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
+                            <div className="p-2 bg-amber-500/10 text-amber-400 rounded-lg border border-amber-500/30">
                                 <ShieldCheck size={20} />
                             </div>
-                            <h2 className="text-lg font-bold text-slate-800">Security & Privacy</h2>
+                            <h2 className="text-lg font-bold text-slate-100">Security & Privacy</h2>
                         </div>
                     </div>
 
@@ -396,7 +396,7 @@ const Profile = () => {
                         <button 
                             type="button"
                             onClick={() => setShowPasswordChange(true)}
-                            className="flex items-center gap-2 text-primary font-semibold hover:underline"
+                            className="flex items-center gap-2 text-cyan-400 font-semibold hover:underline"
                         >
                             <Lock size={16} /> Change Password
                         </button>
@@ -404,14 +404,14 @@ const Profile = () => {
                         <motion.div 
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
-                            className="space-y-4 bg-slate-50 p-6 rounded-xl border border-slate-200"
+                            className="space-y-4 bg-slate-800/50 p-6 rounded-xl border border-slate-700"
                         >
                             <div className="flex justify-between items-center mb-2">
-                                <h3 className="font-semibold text-slate-700">Update Password</h3>
+                                <h3 className="font-semibold text-slate-300">Update Password</h3>
                                 <button 
                                     type="button" 
                                     onClick={() => setShowPasswordChange(false)}
-                                    className="text-slate-400 hover:text-slate-600"
+                                    className="text-slate-400 hover:text-slate-200"
                                 >
                                     <X size={18} />
                                 </button>
@@ -425,7 +425,7 @@ const Profile = () => {
                                         value={passwords.current}
                                         onChange={handlePasswordChange}
                                         placeholder="Current Password"
-                                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-800/70 border border-slate-700 rounded-xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none text-slate-100"
                                     />
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -435,7 +435,7 @@ const Profile = () => {
                                         value={passwords.new}
                                         onChange={handlePasswordChange}
                                         placeholder="New Password"
-                                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-800/70 border border-slate-700 rounded-xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none text-slate-100"
                                     />
                                     <input
                                         type={showPasswords ? "text" : "password"}
@@ -443,19 +443,19 @@ const Profile = () => {
                                         value={passwords.confirm}
                                         onChange={handlePasswordChange}
                                         placeholder="Confirm New Password"
-                                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-800/70 border border-slate-700 rounded-xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none text-slate-100"
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <button 
                                         type="button"
                                         onClick={() => setShowPasswords(!showPasswords)}
-                                        className="text-sm text-slate-500 flex items-center gap-2 hover:text-slate-700"
+                                        className="text-sm text-slate-400 flex items-center gap-2 hover:text-slate-200"
                                     >
                                         {showPasswords ? <EyeOff size={16} /> : <Eye size={16} />}
                                         {showPasswords ? 'Hide Passwords' : 'Show Passwords'}
                                     </button>
-                                    <p className="text-xs text-slate-400">Min 6 characters</p>
+                                    <p className="text-xs text-slate-500">Min 6 characters</p>
                                 </div>
                             </div>
                         </motion.div>
@@ -465,9 +465,9 @@ const Profile = () => {
 
             {/* 4. Financial Year Info */}
             <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
-                <Card className="bg-gradient-to-br from-slate-800 to-slate-900 text-white border-0">
+                <Card className="bg-gradient-to-br from-slate-800 to-slate-900 text-white border border-slate-700">
                     <div className="flex items-start gap-4">
-                        <div className="p-3 bg-white/10 rounded-xl">
+                        <div className="p-3 bg-white/10 rounded-xl border border-white/10">
                             <Calendar size={24} className="text-white" />
                         </div>
                         <div>

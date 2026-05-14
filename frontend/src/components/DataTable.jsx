@@ -13,44 +13,44 @@ export const DataTable = ({
     return (
       <div className="space-y-2">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="bg-white rounded-lg p-4 animate-pulse h-16" />
+          <div key={i} className="bg-slate-800/50 rounded-xl p-4 animate-pulse h-16" />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100/50 shadow-sm overflow-hidden">
+    <div className="glass-card rounded-2xl overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left">
-          <thead className="bg-slate-50/50 border-b border-slate-100 sticky top-0 z-10">
+          <thead className="bg-slate-800/60 border-b border-slate-700/50 sticky top-0 z-10">
             <tr>
               {headers.map((header, idx) => (
                 <th 
                   key={idx} 
-                  className="p-5 font-semibold text-slate-600 text-sm"
+                  className="p-5 font-semibold text-slate-300 text-sm"
                 >
                   {header}
                 </th>
               ))}
-              {onDelete && <th className="p-5 text-center text-slate-600 text-sm">Actions</th>}
+              {onDelete && <th className="p-5 text-center text-slate-300 text-sm">Actions</th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-700/30">
             {rows.length === 0 ? (
               <tr>
                 <td colSpan={headers.length + (onDelete ? 1 : 0)} className="p-12 text-center">
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col items-center justify-center text-slate-400"
+                    className="flex flex-col items-center justify-center text-slate-500"
                   >
                     {EmptyIcon && (
-                      <div className="bg-slate-50 p-4 rounded-full mb-3">
-                        <EmptyIcon size={32} className="text-slate-300" />
+                      <div className="bg-slate-800 p-4 rounded-full mb-3">
+                        <EmptyIcon size={32} className="text-slate-500" />
                       </div>
                     )}
-                    <p className="text-lg font-medium text-slate-600">{emptyMessage}</p>
+                    <p className="text-lg font-medium text-slate-400">{emptyMessage}</p>
                   </motion.div>
                 </td>
               </tr>
@@ -61,11 +61,11 @@ export const DataTable = ({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
-                  whileHover={{ backgroundColor: '#f8fafc' }}
+                  whileHover={{ backgroundColor: 'rgba(30, 41, 59, 0.5)' }}
                   className="group transition-colors"
                 >
                   {row.map((cell, cellIdx) => (
-                    <td key={cellIdx} className="p-4 text-sm text-slate-600 align-middle">
+                    <td key={cellIdx} className="p-4 text-sm text-slate-300 align-middle">
                       {cell}
                     </td>
                   ))}
@@ -75,7 +75,7 @@ export const DataTable = ({
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => onDelete(idx)}
-                        className="text-slate-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100"
+                        className="text-slate-500 hover:text-red-400 transition-colors p-2 hover:bg-red-500/10 rounded-lg"
                         title="Delete Record"
                       >
                         <Trash2 size={18} />

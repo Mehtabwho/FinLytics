@@ -7,38 +7,48 @@ export default {
   theme: {
     extend: {
       colors: {
+        slate: {
+          950: '#0f172a',
+          900: '#1e293b',
+          850: '#334155',
+          800: '#475569',
+        },
         primary: {
-          DEFAULT: '#082341', // Deep Navy
-          light: '#0f2d52',
-          dark: '#05162b',
+          DEFAULT: '#0891b2',
+          light: '#22d3ee',
+          dark: '#0e7490',
         },
         secondary: {
-          DEFAULT: '#305d69', // Teal/Slate
-          light: '#3d7482',
-          dark: '#244750',
+          DEFAULT: '#10b981',
+          light: '#34d399',
+          dark: '#059669',
         },
         accent: {
-          DEFAULT: '#5c9484', // Sage Green
-          light: '#73a99a',
+          DEFAULT: '#7c3aed',
+          light: '#a78bfa',
         },
         background: {
-          DEFAULT: '#ebfbf3', // Mint White
-          paper: '#ffffff',
+          DEFAULT: '#0f172a',
+          paper: '#1e293b',
         },
-        neutral: {
-          DEFAULT: '#b8d0cc', // Grayish Cyan
-          dark: '#344460',    // Dark Slate Blue (Text)
-          light: '#f1f5f9',
+        glass: {
+          DEFAULT: 'rgba(30, 41, 59, 0.75)',
+          border: 'rgba(148, 163, 184, 0.2)',
         },
         profit: '#10b981',
         loss: '#ef4444',
+        warning: '#f59e0b',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
       },
       boxShadow: {
-        'soft': '0 4px 20px -2px rgba(8, 35, 65, 0.05)',
-        'card': '0 0 0 1px rgba(8, 35, 65, 0.03), 0 2px 8px rgba(8, 35, 65, 0.04)',
+        'glass': '0 8px 32px 0 rgba(15, 23, 42, 0.4)',
+        'card': '0 4px 24px -2px rgba(15, 23, 42, 0.3)',
+        'glow': '0 0 20px rgba(8, 145, 178, 0.3)',
+      },
+      backdropBlur: {
+        '2xl': '20px',
       }
     },
   },

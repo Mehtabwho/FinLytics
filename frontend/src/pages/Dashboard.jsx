@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
-import { DollarSign, TrendingUp, TrendingDown, Activity, Lightbulb, AlertCircle, Plus, MessageCircle, Zap } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Activity, Lightbulb, Plus, MessageCircle, Zap, AlertCircle, CheckCircle } from 'lucide-react';
 import { Card, StatCard } from '../components/Card';
 import { SkeletonCard } from '../components/Skeleton';
 import { PageTransition, StaggerContainer } from '../components/Animations';
@@ -23,19 +23,46 @@ const Dashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [insights, setInsights] = useState(null);
+  const [financialAnalysis, setFinancialAnalysis] = useState(null);
   const { year } = useFinancialYear();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Parallel fetching for speed
-        const [incomeRes, expenseRes, taxRes, insightsRes] = await Promise.all([
-             api.get('/income'),
-             api.get('/expenses'),
-             api.get('/tax/calculate'),
-             api.get('/ai/insights').catch(err => ({ data: { insights: null } })) // Handle AI failure gracefully
+
+        // Check if insights are already cached (we'll use cache for insights only,
+        // but still fetch income/expense/tax every time so summary and charts update)
+        const cached = sessionStorage.getItem(`insights-${year}`);
+        let insightsRes;
+
+        // Build requests: always fetch income/expenses/tax
+        const incomePromise = api.get('/income');
+        const expensePromise = api.get('/expenses');
+        const taxPromise = api.get('/tax/calculate');
+
+        if (cached) {
+          // Use cached insights/analysis but still perform other requests
+          const parsed = JSON.parse(cached);
+          setInsights(parsed.insights);
+          setFinancialAnalysis(parsed.analysis);
+          insightsRes = { data: parsed };
+        }
+
+        // Only call AI endpoint if not cached
+        const aiPromise = cached
+          ? Promise.resolve(insightsRes)
+          : api.get(`/ai/insights?year=${year}`).catch(err => ({ data: { insights: null, analysis: null } }));
+
+        const [incomeRes, expenseRes, taxRes, aiRes] = await Promise.all([
+          incomePromise,
+          expensePromise,
+          taxPromise,
+          aiPromise,
         ]);
+
+        // ensure insightsRes references the resolved ai response
+        insightsRes = aiRes;
 
         const incomes = incomeRes.data;
         const totalIncome = incomes.reduce((acc, curr) => acc + curr.amount, 0);
@@ -53,9 +80,17 @@ const Dashboard = () => {
           taxFreeLimit: taxData.taxFreeThreshold,
         });
 
-        setInsights(insightsRes.data.insights);
+        // Cache insights+analysis if we got them from AI
+        if (insightsRes?.data?.insights) {
+          sessionStorage.setItem(`insights-${year}`, JSON.stringify(insightsRes.data));
+          setInsights(insightsRes.data.insights);
+        }
+
+        if (insightsRes?.data?.analysis) {
+          setFinancialAnalysis(insightsRes.data.analysis);
+        }
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        console.error('Error fetching dashboard data:', error);
       } finally {
         setLoading(false);
       }
@@ -85,8 +120,18 @@ const Dashboard = () => {
       {
         label: 'Financial Overview',
         data: [summary.totalIncome, summary.totalExpense, summary.profit],
-        backgroundColor: ['#10B981', '#EF4444', '#0f172a'],
-        borderRadius: 8,
+        backgroundColor: [
+          'rgba(16, 185, 129, 0.8)',
+          'rgba(239, 68, 68, 0.8)',
+          'rgba(6, 182, 212, 0.8)'
+        ],
+        borderColor: [
+          '#10b981',
+          '#ef4444',
+          '#06b6d4'
+        ],
+        borderWidth: 2,
+        borderRadius: 12,
       },
     ],
   };
@@ -96,10 +141,26 @@ const Dashboard = () => {
       maintainAspectRatio: false,
       plugins: {
           legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            titleColor: '#e2e8f0',
+            bodyColor: '#cbd5e1',
+            borderColor: 'rgba(148, 163, 184, 0.2)',
+            borderWidth: 1,
+            padding: 12,
+            cornerRadius: 8,
+          }
       },
       scales: {
-          y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
-          x: { grid: { display: false } }
+          y: { 
+            beginAtZero: true, 
+            grid: { color: 'rgba(148, 163, 184, 0.1)' },
+            ticks: { color: '#94a3b8' }
+          },
+          x: { 
+            grid: { display: false },
+            ticks: { color: '#94a3b8' }
+          }
       }
   };
 
@@ -113,17 +174,10 @@ const Dashboard = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold gradient-text">
               Financial Dashboard
             </h1>
-            <p className="text-slate-500 text-sm mt-2">Fiscal Year {year}</p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4 }}
-          >
-            
+            <p className="text-slate-400 text-sm mt-2">Fiscal Year {year}</p>
           </motion.div>
         </div>
 
@@ -135,10 +189,10 @@ const Dashboard = () => {
           className="grid grid-cols-2 md:grid-cols-4 gap-3"
         >
           {[
-            { label: 'Add Income', icon: Plus, color: 'bg-green-50 text-green-600 border-green-200', path: '/income' },
-            { label: 'Add Expense', icon: Plus, color: 'bg-red-50 text-red-600 border-red-200', path: '/expenses' },
-            { label: 'View Tax', icon: Activity, color: 'bg-purple-50 text-purple-600 border-purple-200', path: '/tax' },
-            { label: 'Chat AI', icon: MessageCircle, color: 'bg-blue-50 text-blue-600 border-blue-200', path: '/chat' },
+            { label: 'Add Income', icon: Plus, color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20', path: '/income' },
+            { label: 'Add Expense', icon: Plus, color: 'bg-red-500/10 text-red-400 border-red-500/20', path: '/expenses' },
+            { label: 'View Tax', icon: Activity, color: 'bg-purple-500/10 text-purple-400 border-purple-500/20', path: '/tax' },
+            { label: 'Chat AI', icon: MessageCircle, color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20', path: '/chat' },
           ].map((action, idx) => {
             const Icon = action.icon;
             return (
@@ -147,7 +201,7 @@ const Dashboard = () => {
                 whileHover={{ y: -4 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate(action.path)}
-                className={`flex items-center justify-center gap-2 p-4 ${action.color} border rounded-xl transition-all shadow-sm hover:shadow-md group`}
+                className={`flex items-center justify-center gap-2 p-4 glass-card border ${action.color} rounded-xl transition-all group`}
               >
                 <Icon size={20} className="group-hover:rotate-12 transition-transform" />
                 <span className="text-sm font-semibold">{action.label}</span>
@@ -204,17 +258,17 @@ const Dashboard = () => {
           {/* Bar Chart */}
           <Card className="lg:col-span-2 p-6" hover={false}>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-slate-900">Financial Overview</h3>
-              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                <Activity size={20} className="text-blue-600" />
+              <h3 className="text-lg font-semibold text-slate-100">Financial Overview</h3>
+              <div className="w-10 h-10 bg-cyan-500/10 rounded-lg flex items-center justify-center border border-cyan-500/20">
+                <Activity size={20} className="text-cyan-400" />
               </div>
             </div>
             <div className="h-80">
               {summary.totalIncome === 0 && summary.totalExpense === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
+                <div className="h-full flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-slate-700 rounded-xl bg-slate-800/30">
                   <AlertCircle size={40} className="mb-3 opacity-40"/>
                   <p className="text-base font-medium">No financial data available</p>
-                  <p className="text-sm mt-1">Add income and expenses to see charts</p>
+                  <p className="text-sm mt-1 text-slate-500">Add income and expenses to see charts</p>
                 </div>
               ) : (
                 <Bar data={chartData} options={chartOptions} />
@@ -224,20 +278,20 @@ const Dashboard = () => {
 
           {/* Summary Card */}
           <Card className="p-6" hover={false}>
-            <h3 className="text-lg font-semibold text-slate-900 mb-6">Period Summary</h3>
+            <h3 className="text-lg font-semibold text-slate-100 mb-6">Period Summary</h3>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                <span className="text-sm text-slate-600">Income</span>
-                <span className="font-semibold text-green-600">+৳{(summary.totalIncome / 1000000).toFixed(1)}M</span>
+              <div className="flex items-center justify-between p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                <span className="text-sm text-slate-300">Income</span>
+                <span className="font-semibold text-emerald-400 whitespace-nowrap">+৳{summary.totalIncome.toLocaleString()}</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                <span className="text-sm text-slate-600">Expenses</span>
-                <span className="font-semibold text-red-600">-৳{(summary.totalExpense / 1000000).toFixed(1)}M</span>
+              <div className="flex items-center justify-between p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                <span className="text-sm text-slate-300">Expenses</span>
+                <span className="font-semibold text-red-400 whitespace-nowrap">-৳{summary.totalExpense.toLocaleString()}</span>
               </div>
-              <div className="border-t pt-4">
+              <div className="border-t border-slate-700/50 pt-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-600">Profit Margin</span>
-                  <span className="text-lg font-bold text-slate-900">
+                  <span className="text-sm font-medium text-slate-300">Profit Margin</span>
+                  <span className="text-lg font-bold text-slate-100">
                     {summary.totalIncome > 0
                       ? ((summary.profit / summary.totalIncome) * 100).toFixed(1)
                       : '0'}%
@@ -248,32 +302,153 @@ const Dashboard = () => {
           </Card>
         </motion.div>
 
+        {/* Financial Health & Alerts Section */}
+        {financialAnalysis && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.35 }}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+          >
+            {/* Financial Health Score Card */}
+            <Card className="p-6" hover={false}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-slate-100">Financial Health</h3>
+                <div className={`px-3 py-1 rounded-full text-xs font-semibold border ${
+                  financialAnalysis.healthStatus === 'Excellent' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                  financialAnalysis.healthStatus === 'Good' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' :
+                  financialAnalysis.healthStatus === 'Fair' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                  'bg-red-500/10 text-red-400 border-red-500/20'
+                }`}>
+                  {financialAnalysis.healthStatus}
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="relative w-24 h-24">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    <circle 
+                      cx="50" cy="50" r="40" 
+                      fill="none" 
+                      stroke="rgba(51, 65, 85, 0.5)" 
+                      strokeWidth="10"
+                    />
+                    <circle 
+                      cx="50" cy="50" r="40" 
+                      fill="none" 
+                      stroke={
+                        financialAnalysis.financialHealthScore >= 80 ? '#10b981' :
+                        financialAnalysis.financialHealthScore >= 65 ? '#06b6d4' :
+                        financialAnalysis.financialHealthScore >= 50 ? '#f59e0b' :
+                        '#ef4444'
+                      } 
+                      strokeWidth="10"
+                      strokeLinecap="round"
+                      strokeDasharray={`${2 * Math.PI * 40}`}
+                      strokeDashoffset={`${2 * Math.PI * 40 * (1 - financialAnalysis.financialHealthScore / 100)}`}
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-slate-100">
+                      {financialAnalysis.financialHealthScore}
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-2 flex-1">
+                  <p className="text-sm text-slate-300">
+                    {financialAnalysis.healthExplanation}
+                  </p>
+                  <div className="flex items-center gap-4 text-xs text-slate-400">
+                    <span>Savings: {financialAnalysis.metrics.savingsRate}%</span>
+                    <span>•</span>
+                    <span>Emergency: {financialAnalysis.metrics.emergencyFundMonths} mo</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Smart Alerts Card */}
+            <Card className="p-6 lg:col-span-2" hover={false}>
+              <div className="flex items-center gap-3 mb-4">
+                <AlertCircle size={20} className="text-amber-400" />
+                <h3 className="text-lg font-semibold text-slate-100">Smart Alerts</h3>
+              </div>
+              <div className="space-y-3">
+                {financialAnalysis.alerts && financialAnalysis.alerts.length > 0 ? (
+                  financialAnalysis.alerts.map((alert, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`p-3 rounded-lg border flex items-start gap-3 ${
+                        alert.severity === 'critical' ? 'bg-red-500/10 border-red-500/20' :
+                        alert.severity === 'high' ? 'bg-amber-500/10 border-amber-500/20' :
+                        alert.severity === 'medium' ? 'bg-yellow-500/10 border-yellow-500/20' :
+                        'bg-cyan-500/10 border-cyan-500/20'
+                      }`}
+                    >
+                      <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
+                        alert.severity === 'critical' ? 'bg-red-500' :
+                        alert.severity === 'high' ? 'bg-amber-500' :
+                        alert.severity === 'medium' ? 'bg-yellow-500' :
+                        'bg-cyan-500'
+                      }`} />
+                      <div>
+                        <p className={`text-sm font-semibold ${
+                          alert.severity === 'critical' ? 'text-red-400' :
+                          alert.severity === 'high' ? 'text-amber-400' :
+                          alert.severity === 'medium' ? 'text-yellow-400' :
+                          'text-cyan-400'
+                        }`}>
+                          {alert.title}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-1">
+                          {alert.message}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-6 rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-center">
+                    <CheckCircle size={32} className="text-emerald-400 mx-auto mb-2" />
+                    <p className="text-sm font-semibold text-emerald-400">No alerts</p>
+                    <p className="text-xs text-slate-500 mt-1">Your finances look healthy!</p>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </motion.div>
+        )}
+
         {/* AI Insights */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.4 }}
+          transition={{ duration: 0.4, delay: 0.45 }}
         >
-          <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-8 border-0" hover={false}>
+          <Card className="p-8 border border-amber-500/20" hover={false}>
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-amber-400/20 rounded-xl flex items-center justify-center flex-shrink-0 backdrop-blur">
-                <Lightbulb size={24} className="text-amber-300" />
+              <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center flex-shrink-0 border border-amber-500/30">
+                <Lightbulb size={24} className="text-amber-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold mb-3">AI Financial Advisor</h3>
+                <h3 className="text-lg font-semibold mb-3 text-slate-100">AI Financial Advisor</h3>
                 {insights ? (
-                  <p className="text-slate-200 text-sm leading-relaxed">
-                    {insights.replace(/\*\*/g, '').replace(/###/g, '')}
-                  </p>
+                  <div className="text-slate-300 text-sm leading-relaxed whitespace-pre-line">
+                    {insights
+                      .replace(/\*\*/g, '') // Remove bold
+                      .replace(/###/g, '') // Remove h3
+                      .replace(/##/g, '') // Remove h2
+                      .replace(/#/g, '') // Remove h1
+                      .replace(/`/g, '') // Remove code
+                      .trim()}
+                  </div>
                 ) : (
-                  <div className="text-slate-300 text-sm">
+                  <div className="text-slate-400 text-sm">
                     {summary.totalIncome === 0 ? 
                       <div>
-                        <p className="font-medium mb-2">Get Started with AI Insights</p>
-                        <p className="text-slate-400 text-xs">Add your income and expenses to receive personalized financial advice and tax-saving recommendations.</p>
+                        <p className="font-medium mb-2 text-slate-200">Get Started with AI Insights</p>
+                        <p className="text-slate-500 text-xs">Add your income and expenses to receive personalized financial advice and tax-saving recommendations.</p>
                       </div> :
                       <div className="flex items-center gap-2">
-                        <div className="animate-pulse w-2 h-2 bg-amber-300 rounded-full"></div>
+                        <div className="animate-pulse w-2 h-2 bg-amber-400 rounded-full"></div>
                         <p>Analyzing your financial data...</p>
                       </div>
                     }
@@ -281,7 +456,7 @@ const Dashboard = () => {
                 )}
                 <button 
                   onClick={() => navigate('/chat')}
-                  className="mt-4 px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-lg text-sm font-semibold transition-colors"
+                  className="mt-4 px-4 py-2 gradient-btn text-white rounded-lg text-sm font-semibold"
                 >
                   Chat with AI
                 </button>

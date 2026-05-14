@@ -78,11 +78,11 @@ const Reports = () => {
                 label: 'Income',
                 data: incomeData,
                 borderColor: '#10b981', // Green
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                backgroundColor: 'rgba(16, 185, 129, 0.15)',
                 tension: 0.4,
                 fill: true,
                 pointBackgroundColor: '#10b981',
-                pointBorderColor: '#ffffff',
+                pointBorderColor: '#0f172a',
                 pointBorderWidth: 2,
                 pointRadius: 4,
                 pointHoverRadius: 6
@@ -91,11 +91,11 @@ const Reports = () => {
                 label: 'Expenses',
                 data: expenseData,
                 borderColor: '#ef4444', // Red
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                backgroundColor: 'rgba(239, 68, 68, 0.15)',
                 tension: 0.4,
                 fill: true,
                 pointBackgroundColor: '#ef4444',
-                pointBorderColor: '#ffffff',
+                pointBorderColor: '#0f172a',
                 pointBorderWidth: 2,
                 pointRadius: 4,
                 pointHoverRadius: 6
@@ -117,16 +117,19 @@ const Reports = () => {
           padding: 20,
           font: {
             family: "'Inter', sans-serif",
-            size: 12
+            size: 12,
+            color: '#cbd5e1'
           }
         }
       },
       tooltip: {
         backgroundColor: '#1e293b',
-        titleFont: { family: "'Inter', sans-serif", size: 13 },
-        bodyFont: { family: "'Inter', sans-serif", size: 12 },
+        titleFont: { family: "'Inter', sans-serif", size: 13, color: '#e2e8f0' },
+        bodyFont: { family: "'Inter', sans-serif", size: 12, color: '#cbd5e1' },
         padding: 12,
         cornerRadius: 8,
+        borderColor: 'rgba(148, 163, 184, 0.2)',
+        borderWidth: 1,
         displayColors: false
       }
     },
@@ -138,18 +141,18 @@ const Reports = () => {
         },
         ticks: {
           font: { family: "'Inter', sans-serif", size: 11 },
-          color: '#64748b'
+          color: '#94a3b8'
         }
       },
       y: {
         grid: {
-          color: '#f1f5f9',
+          color: 'rgba(148, 163, 184, 0.1)',
           borderDash: [4, 4],
           drawBorder: false
         },
         ticks: {
           font: { family: "'Inter', sans-serif", size: 11 },
-          color: '#64748b',
+          color: '#94a3b8',
           callback: (value) => '৳' + value.toLocaleString()
         }
       }
@@ -189,7 +192,7 @@ const Reports = () => {
           usePointStyle: true,
           pointStyle: 'circle',
           padding: 20,
-          font: { family: "'Inter', sans-serif", size: 12 }
+          font: { family: "'Inter', sans-serif", size: 12, color: '#cbd5e1' }
         }
       }
     }
@@ -302,15 +305,15 @@ const Reports = () => {
 
   const tableRows = transactions.map((t) => [
     new Date(t.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-    <span key={t._id} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${
-      t.type === 'income' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+    <span key={t._id} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${
+      t.type === 'income' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'
     }`}>
       {t.type === 'income' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
       {t.type === 'income' ? 'Income' : 'Expense'}
     </span>,
     t.type === 'income' ? t.source : t.category,
     t.description || '-',
-    <span key={`amount-${t._id}`} className={`font-bold text-sm ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+    <span key={`amount-${t._id}`} className={`font-bold text-sm ${t.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
       {t.type === 'income' ? '+' : '-'}৳{t.amount.toLocaleString()}
     </span>
   ]);
@@ -339,20 +342,20 @@ const Reports = () => {
         className="flex justify-between items-center"
       >
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-gradient-to-br from-primary to-primary-light rounded-xl shadow-lg">
+          <div className="p-3 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl shadow-lg border border-cyan-500/30">
             <FileText className="text-white" size={24} />
           </div>
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold gradient-text">
               Annual Reports
             </h1>
-            <p className="text-sm text-slate-500">Comprehensive financial overview & trends</p>
+            <p className="text-sm text-slate-400">Comprehensive financial overview & trends</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="primary" onClick={handleDownloadPDF} className="flex items-center gap-2">
             <Download size={16} />
-            <span>Download PDF</span>
+            Download PDF
           </Button>
         </div>
       </motion.div>
@@ -361,58 +364,58 @@ const Reports = () => {
       <StaggerContainer delay={0.06}>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
-            <Card className="hover:shadow-lg transition-shadow">
+            <Card>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 font-medium">Total Income</p>
-                  <p className="text-3xl font-bold text-secondary mt-2">৳{totalIncome.toLocaleString()}</p>
+                  <p className="text-sm text-slate-400 font-medium">Total Income</p>
+                  <p className="text-3xl font-bold text-emerald-400 mt-2">৳{totalIncome.toLocaleString()}</p>
                 </div>
-                <div className="p-3 bg-secondary/10 rounded-xl">
-                  <TrendingUp className="text-secondary" size={24} />
+                <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                  <TrendingUp className="text-emerald-400" size={24} />
                 </div>
               </div>
             </Card>
           </motion.div>
 
           <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
-            <Card className="hover:shadow-lg transition-shadow">
+            <Card>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 font-medium">Total Expense</p>
-                  <p className="text-3xl font-bold text-red-500 mt-2">৳{totalExpense.toLocaleString()}</p>
+                  <p className="text-sm text-slate-400 font-medium">Total Expense</p>
+                  <p className="text-3xl font-bold text-red-400 mt-2">৳{totalExpense.toLocaleString()}</p>
                 </div>
-                <div className="p-3 bg-red-100 rounded-xl">
-                  <TrendingDown className="text-red-500" size={24} />
+                <div className="p-3 bg-red-500/10 rounded-xl border border-red-500/20">
+                  <TrendingDown className="text-red-400" size={24} />
                 </div>
               </div>
             </Card>
           </motion.div>
 
           <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
-            <Card className="hover:shadow-lg transition-shadow">
+            <Card>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 font-medium">Net Profit</p>
-                  <p className={`text-3xl font-bold mt-2 ${netProfit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  <p className="text-sm text-slate-400 font-medium">Net Profit</p>
+                  <p className={`text-3xl font-bold mt-2 ${netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                     ৳{netProfit.toLocaleString()}
                   </p>
                 </div>
-                <div className={`p-3 rounded-xl ${netProfit >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-                  {netProfit >= 0 ? <TrendingUp className="text-green-500" size={24} /> : <TrendingDown className="text-red-500" size={24} />}
+                <div className={`p-3 rounded-xl ${netProfit >= 0 ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
+                  {netProfit >= 0 ? <TrendingUp className="text-emerald-400" size={24} /> : <TrendingDown className="text-red-400" size={24} />}
                 </div>
               </div>
             </Card>
           </motion.div>
 
           <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
-            <Card className="hover:shadow-lg transition-shadow bg-gradient-to-br from-primary/5 to-secondary/5 border-secondary/20">
+            <Card className="hover:shadow-lg transition-shadow bg-gradient-to-br from-cyan-500/10 to-emerald-500/10 border border-cyan-500/20">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 font-medium">Estimated Tax</p>
-                  <p className="text-3xl font-bold text-primary mt-2">৳{(financialData.tax.taxPayable || 0).toLocaleString()}</p>
+                  <p className="text-sm text-slate-400 font-medium">Estimated Tax</p>
+                  <p className="text-3xl font-bold text-cyan-400 mt-2">৳{(financialData.tax.taxPayable || 0).toLocaleString()}</p>
                 </div>
-                <div className="p-3 bg-primary/10 rounded-xl">
-                  <Calendar className="text-primary" size={24} />
+                <div className="p-3 bg-cyan-500/10 rounded-xl border border-cyan-500/20">
+                  <Calendar className="text-cyan-400" size={24} />
                 </div>
               </div>
             </Card>
@@ -425,8 +428,8 @@ const Reports = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="lg:col-span-2">
           <Card>
             <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="text-secondary" size={20} />
-              <h3 className="font-bold text-slate-800">Financial Trends (Jul - Jun)</h3>
+              <TrendingUp className="text-emerald-400" size={20} />
+              <h3 className="font-bold text-slate-100">Financial Trends (Jul - Jun)</h3>
             </div>
             <div className="h-64">
               <Line options={chartOptions} data={processMonthlyData()} />
@@ -438,8 +441,8 @@ const Reports = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <Card>
             <div className="flex items-center gap-2 mb-4">
-              <TrendingDown className="text-red-500" size={20} />
-              <h3 className="font-bold text-slate-800">Expense Distribution</h3>
+              <TrendingDown className="text-red-400" size={20} />
+              <h3 className="font-bold text-slate-100">Expense Distribution</h3>
             </div>
             <div className="h-64 flex justify-center">
               <Pie options={pieOptions} data={processExpenseCategories()} />
@@ -456,26 +459,26 @@ const Reports = () => {
         className="space-y-4"
       >
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <h2 className="text-xl font-bold text-slate-800">Transaction History</h2>
+          <h2 className="text-xl font-bold text-slate-100">Transaction History</h2>
           
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
               <input 
                 type="text" 
                 placeholder="Search transactions..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-full sm:w-64"
+                className="pl-10 pr-4 py-2 bg-slate-800/50 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 w-full sm:w-64 text-slate-100 placeholder:text-slate-500"
               />
             </div>
             
             <div className="relative">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
               <select 
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="pl-10 pr-8 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none cursor-pointer"
+                className="pl-10 pr-8 py-2 bg-slate-800/50 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 appearance-none cursor-pointer text-slate-100"
               >
                 <option value="all">All Types</option>
                 <option value="income">Income Only</option>

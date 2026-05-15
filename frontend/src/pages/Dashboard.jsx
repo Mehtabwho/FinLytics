@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [insights, setInsights] = useState(null);
   const [financialAnalysis, setFinancialAnalysis] = useState(null);
   const { year } = useFinancialYear();
+  const [dataUpdated, setDataUpdated] = useState(false); // Track data changes
 
   useEffect(() => {
     const fetchData = async () => {
@@ -97,7 +98,12 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, [year]);
+  }, [year, dataUpdated]); // Re-fetch data when year or dataUpdated changes
+
+  const handleDataUpdate = () => {
+    sessionStorage.removeItem(`insights-${year}`); // Clear cached insights
+    setDataUpdated(prev => !prev); // Trigger re-fetch
+  };
 
   if (loading) {
     return (

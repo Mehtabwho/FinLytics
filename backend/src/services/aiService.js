@@ -8,6 +8,8 @@ const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-8
 
 const callOpenRouter = async (messages, maxTokens = 800) => {
   try {
+    console.log("AI Prompt:", JSON.stringify(messages, null, 2));
+    console.log("Using Model:", OPENROUTER_MODEL);
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {

@@ -74,7 +74,7 @@ const GuestTaxCalculator = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/public/tax-estimate', formData);
+      const response = await axios.post('https://finlytics-f0ry.onrender.com/api/public/tax-estimate', formData);
       setResults(response.data);
       setTimeout(() => {
         document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth' });

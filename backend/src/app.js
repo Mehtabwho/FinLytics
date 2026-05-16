@@ -17,7 +17,7 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: ['https://your-vercel-domain.vercel.app'], // Replace with your Vercel frontend URL
+  origin: ['https://finlyticsai.vercel.app/'], // Replace with your Vercel frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true, // Allow cookies if needed
 }));

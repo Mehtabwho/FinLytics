@@ -28,14 +28,19 @@ export const FinancialYearProvider = ({ children }) => {
   };
 
   const [year, setYear] = useState(getInitialYear);
+  const [dataUpdated, setDataUpdated] = useState(false);
 
   const changeYear = (newYear) => {
     setYear(newYear);
     localStorage.setItem('financialYear', newYear);
   };
 
+  const triggerRefresh = () => {
+    setDataUpdated(prev => !prev);
+  };
+
   return (
-    <FinancialYearContext.Provider value={{ year, setYear: changeYear }}>
+    <FinancialYearContext.Provider value={{ year, setYear: changeYear, dataUpdated, triggerRefresh }}>
       {children}
     </FinancialYearContext.Provider>
   );

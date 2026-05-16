@@ -192,13 +192,13 @@ const Tax = () => {
 
             {/* Right Column: AI Insights */}
             <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="space-y-6">
-                <Card className="bg-gradient-to-br from-cyan-600 to-primary text-white border-0 relative overflow-hidden" hover={false}>
+                <Card className="bg-gradient-to-br from-cyan-600 to-primary text-white border-0 relative overflow-hidden p-6" hover={false}>
                     <div className="absolute top-0 right-0 p-4 opacity-10">
                         <Info size={100} />
                     </div>
                     
                     <div className="relative z-10">
-                        <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center justify-between mb-6">
                             <h3 className="font-bold flex items-center gap-2">
                                 <Info size={20} className="text-emerald-400" /> AI Tax Insight
                             </h3>
@@ -218,9 +218,9 @@ const Tax = () => {
                                 <div className="text-slate-200 text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: explanation.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<b class="text-white">$1</b>') }} />
                             </div>
                         ) : (
-                            <div className="text-slate-300 text-sm italic border border-white/10 rounded-xl p-4 bg-white/5">
-                                <p className="mb-2">Click "Analyze Now" to get a personalized explanation of your tax liability based on NBR rules.</p>
-                                <ul className="list-disc list-inside text-xs space-y-1 opacity-70">
+                            <div className="text-slate-300 text-sm italic border border-white/10 rounded-xl p-5 bg-white/5">
+                                <p className="mb-3">Click "Analyze Now" to get a personalized explanation of your tax liability based on NBR rules.</p>
+                                <ul className="list-disc list-inside text-xs space-y-1.5 opacity-70">
                                     <li>Why your tax is {taxData.taxPayable > 0 ? 'calculated at this amount' : 'zero'}</li>
                                     <li>How your {taxData.taxpayerCategory} status affects the limit</li>
                                     <li>Tips to reduce tax legally</li>

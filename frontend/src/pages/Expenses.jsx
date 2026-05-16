@@ -18,7 +18,7 @@ const Expenses = () => {
   const [nlText, setNlText] = useState('');
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const { year } = useFinancialYear();
+  const { year, triggerRefresh } = useFinancialYear();
 
   useEffect(() => {
     fetchExpenses();
@@ -57,6 +57,7 @@ const Expenses = () => {
       setNlText('');
       setNaturalLanguageMode(false);
       fetchExpenses();
+      triggerRefresh();
     } catch (error) {
       alert(error.response?.data?.message || 'Error adding expense');
     } finally {
@@ -72,6 +73,7 @@ const Expenses = () => {
       try {
         await api.delete(`/expenses/${itemToDelete._id}`);
         fetchExpenses();
+        triggerRefresh();
       } catch (error) {
         console.error(error);
       }

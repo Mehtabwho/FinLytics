@@ -25,8 +25,7 @@ const Dashboard = () => {
   const [insightsLoading, setInsightsLoading] = useState(false);
   const [insights, setInsights] = useState(null);
   const [financialAnalysis, setFinancialAnalysis] = useState(null);
-  const { year } = useFinancialYear();
-  const [dataUpdated, setDataUpdated] = useState(false);
+  const { year, dataUpdated, triggerRefresh } = useFinancialYear();
 
   const fetchData = async () => {
     try {
@@ -94,7 +93,7 @@ const Dashboard = () => {
   }, [year, loading, dataUpdated]);
 
   const handleRefreshInsights = () => {
-    setDataUpdated(prev => !prev);
+    triggerRefresh();
   };
 
   if (loading) {

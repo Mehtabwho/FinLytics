@@ -149,7 +149,7 @@ const Goals = () => {
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <Card className="h-full flex flex-col border-l-4 border-l-cyan-500 relative overflow-hidden group">
+                    <Card className="h-full flex flex-col border-l-4 border-l-cyan-500 relative overflow-hidden group p-6">
                       {/* Actions */}
                       <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
@@ -166,7 +166,7 @@ const Goals = () => {
                         </button>
                       </div>
 
-                      <div className="flex items-start gap-4 mb-4">
+                      <div className="flex items-start gap-4 mb-6">
                         <div className="p-3 bg-cyan-500/10 rounded-xl border border-cyan-500/20">
                           <Target className="text-cyan-400" size={24} />
                         </div>
@@ -178,14 +178,14 @@ const Goals = () => {
                         </div>
                       </div>
 
-                      <div className="space-y-4 flex-grow">
+                      <div className="space-y-5 flex-grow">
                         <div className="flex justify-between items-end">
                           <div>
-                            <p className="text-sm text-slate-400 font-medium">Progress</p>
+                            <p className="text-sm text-slate-400 font-medium mb-1">Progress</p>
                             <p className="text-2xl font-bold text-slate-100">{progress}%</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm text-slate-400 font-medium">Remaining</p>
+                            <p className="text-sm text-slate-400 font-medium mb-1">Remaining</p>
                             <p className="text-lg font-semibold text-slate-300">৳{remaining.toLocaleString()}</p>
                           </div>
                         </div>
@@ -202,7 +202,7 @@ const Goals = () => {
                           />
                         </div>
 
-                        <div className="flex justify-between text-sm">
+                        <div className="flex justify-between text-sm pt-1">
                           <span className="text-slate-400">Saved: ৳{goal.currentAmount.toLocaleString()}</span>
                           <span className="text-slate-500">Target: ৳{goal.targetAmount.toLocaleString()}</span>
                         </div>
@@ -213,9 +213,9 @@ const Goals = () => {
                             <motion.div 
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
-                              className="bg-cyan-500/10 rounded-xl p-4 relative border border-cyan-500/20"
+                              className="bg-cyan-500/10 rounded-xl p-5 relative border border-cyan-500/20"
                             >
-                              <div className="flex items-center gap-2 mb-2 text-cyan-400 font-semibold text-sm">
+                              <div className="flex items-center gap-2 mb-3 text-cyan-400 font-semibold text-sm">
                                 <Sparkles size={16} />
                                 <span>AI Recommendation</span>
                               </div>
@@ -224,7 +224,7 @@ const Goals = () => {
                               </p>
                               <button 
                                 onClick={() => fetchInsights(goal._id)}
-                                className="mt-2 text-xs text-cyan-400 hover:underline flex items-center gap-1"
+                                className="mt-3 text-xs text-cyan-400 hover:underline flex items-center gap-1"
                               >
                                 <Clock size={12} /> Refresh insight
                               </button>

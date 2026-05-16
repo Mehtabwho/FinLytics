@@ -18,7 +18,7 @@ const Income = () => {
   const [nlText, setNlText] = useState('');
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const { year } = useFinancialYear();
+  const { year, triggerRefresh } = useFinancialYear();
 
   useEffect(() => {
     fetchIncomes();
@@ -57,6 +57,7 @@ const Income = () => {
       setNlText('');
       setNaturalLanguageMode(false);
       fetchIncomes();
+      triggerRefresh();
     } catch (error) {
       alert(error.response?.data?.message || 'Error adding income');
     } finally {
@@ -76,6 +77,7 @@ const Income = () => {
       try {
         await api.delete(`/income/${itemToDelete._id}`);
         fetchIncomes();
+        triggerRefresh();
       } catch (error) {
         console.error(error);
       }

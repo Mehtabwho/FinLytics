@@ -323,27 +323,46 @@ const GuestTaxCalculator = () => {
                   <div className="lg:col-span-7">
                     <Card className="p-10 overflow-hidden relative">
                       <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-cyan-500 to-emerald-500" />
-                      <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+                      <div className="flex flex-col gap-6">
+
+                        {/* Net Tax Payable */}
                         <div className="text-center md:text-left">
-                          <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Net Tax Payable</span>
+                          <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+                            Net Tax Payable
+                          </span>
+
                           <div className="text-6xl font-black gradient-text mt-2">
                             {formatCurrency(results.netTax)}
                           </div>
+
                           <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20">
                             <TrendingUp size={14} />
                             Includes ৳{results.rebate.toLocaleString()} Rebate
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
-                          <div className="p-6 bg-slate-800/50 rounded-2xl text-center border border-slate-700/50 min-w-[150px]">
-                            <p className="text-sm font-bold text-slate-400 uppercase">Gross Tax</p>
-                            <p className="font-bold text-slate-100 text-lg">৳{results.grossTax.toLocaleString()}</p>
-                          </div>
-                          <div className="p-6 bg-slate-800/50 rounded-2xl text-center border border-slate-700/50 min-w-[150px]">
-                            <p className="text-sm font-bold text-slate-400 uppercase">Taxable Income</p>
-                            <p className="font-bold text-slate-100 text-lg">৳{results.taxableIncome.toLocaleString()}</p>
-                          </div>
+
+                        {/* Gross Tax */}
+                        <div className="p-6 bg-slate-800/50 rounded-2xl text-center border border-slate-700/50">
+                          <p className="text-sm font-bold text-slate-400 uppercase">
+                            Gross Tax
+                          </p>
+
+                          <p className="font-bold text-slate-100 text-lg">
+                            ৳{results.grossTax.toLocaleString()}
+                          </p>
                         </div>
+
+                        {/* Taxable Income */}
+                        <div className="p-6 bg-slate-800/50 rounded-2xl text-center border border-slate-700/50">
+                          <p className="text-sm font-bold text-slate-400 uppercase">
+                            Taxable Income
+                          </p>
+
+                          <p className="font-bold text-slate-100 text-lg">
+                            ৳{results.taxableIncome.toLocaleString()}
+                          </p>
+                        </div>
+
                       </div>
                     </Card>
 

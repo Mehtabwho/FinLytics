@@ -139,7 +139,7 @@ const GuestTaxCalculator = () => {
                 Master Your Taxes in <span className="gradient-text">60 Seconds.</span>
               </h1>
               <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-                Professional tax estimation for Bangladeshi taxpayers. Zero login required. Start planning your savings today.
+                Professional tax estimation for Bangladeshi taxpayers. Start planning your savings today.
               </p>
             </motion.div>
           </div>
@@ -335,13 +335,13 @@ const GuestTaxCalculator = () => {
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
-                          <div className="p-4 bg-slate-800/50 rounded-2xl text-center border border-slate-700/50">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase">Gross Tax</p>
-                            <p className="font-bold text-slate-100">৳{results.grossTax.toLocaleString()}</p>
+                          <div className="p-6 bg-slate-800/50 rounded-2xl text-center border border-slate-700/50">
+                            <p className="text-sm font-bold text-slate-400 uppercase">Gross Tax</p>
+                            <p className="font-bold text-slate-100 text-lg">৳{results.grossTax.toLocaleString()}</p>
                           </div>
-                          <div className="p-4 bg-slate-800/50 rounded-2xl text-center border border-slate-700/50">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase">Taxable</p>
-                            <p className="font-bold text-slate-100">৳{results.taxableIncome.toLocaleString()}</p>
+                          <div className="p-6 bg-slate-800/50 rounded-2xl text-center border border-slate-700/50">
+                            <p className="text-sm font-bold text-slate-400 uppercase">Taxable Income</p>
+                            <p className="font-bold text-slate-100 text-lg">৳{results.taxableIncome.toLocaleString()}</p>
                           </div>
                         </div>
                       </div>

@@ -244,7 +244,7 @@ const Expenses = () => {
                   onClick={() => setNaturalLanguageMode(true)}
                   className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${naturalLanguageMode ? 'bg-slate-600 shadow-sm text-cyan-400' : 'text-slate-400'}`}
                 >
-                  AI Voice/Text
+                  AI Text
                 </button>
               </div>
 

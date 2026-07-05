@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Upload, X, FileText, CheckCircle, AlertCircle, Loader2, Save } from 'lucide-react';
 import api from '../api/axios';
 
-const DocumentUploadModal = ({ isOpen, onClose, onSuccess }) => {
+const DocumentUploadModal = ({ isOpen, onClose, onSuccess, financialYear }) => {
   const [file, setFile] = useState(null);
   const [scanning, setScanning] = useState(false);
   const [preview, setPreview] = useState(null);
@@ -50,7 +50,7 @@ const DocumentUploadModal = ({ isOpen, onClose, onSuccess }) => {
     setSaving(true);
     setError('');
     try {
-      await api.post('/ocr/save-entry', preview);
+      await api.post('/ocr/save-entry', { ...preview, financialYear });
       onSuccess();
       onClose();
       // Reset state
@@ -69,15 +69,15 @@ const DocumentUploadModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+      <div className="glass-card rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-            <Upload size={20} className="text-primary" />
+        <div className="p-4 border-b border-slate-700/50 flex justify-between items-center bg-slate-800/50">
+          <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+            <Upload size={20} className="text-cyan-500" />
             AI Document Scan
           </h3>
-          <button onClick={onClose} className="p-1 hover:bg-slate-200 rounded-full transition-colors text-slate-500">
+          <button onClick={onClose} className="p-1 hover:bg-slate-700 rounded-full transition-colors text-slate-400">
             <X size={20} />
           </button>
         </div>
@@ -85,7 +85,7 @@ const DocumentUploadModal = ({ isOpen, onClose, onSuccess }) => {
         {/* Content */}
         <div className="p-6 overflow-y-auto flex-1">
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm flex items-center gap-2">
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-sm flex items-center gap-2">
               <AlertCircle size={16} />
               {error}
             </div>
@@ -95,14 +95,14 @@ const DocumentUploadModal = ({ isOpen, onClose, onSuccess }) => {
             <div className="space-y-6">
               <div 
                 onClick={() => fileInputRef.current.click()}
-                className="border-2 border-dashed border-slate-200 rounded-2xl p-10 flex flex-col items-center justify-center gap-4 hover:border-primary hover:bg-primary/5 cursor-pointer transition-all group"
+                className="border-2 border-dashed border-slate-600 rounded-2xl p-10 flex flex-col items-center justify-center gap-4 hover:border-cyan-500 hover:bg-cyan-500/5 cursor-pointer transition-all group"
               >
-                <div className="p-4 bg-slate-100 rounded-full text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                <div className="p-4 bg-slate-800 rounded-full text-slate-400 group-hover:bg-cyan-500/10 group-hover:text-cyan-500 transition-all">
                   <FileText size={40} />
                 </div>
                 <div className="text-center">
-                  <p className="font-bold text-slate-700">Click to upload or drag & drop</p>
-                  <p className="text-sm text-slate-400">Upload JPG or PNG image</p>
+                  <p className="font-bold text-slate-200">Click to upload or drag & drop</p>
+                  <p className="text-sm text-slate-500">Upload JPG or PNG image</p>
                 </div>
                 <input 
                   type="file" 
@@ -114,20 +114,20 @@ const DocumentUploadModal = ({ isOpen, onClose, onSuccess }) => {
               </div>
 
               {file && (
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl border border-slate-700">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white rounded-lg border border-slate-200">
-                      <FileText size={20} className="text-slate-600" />
+                    <div className="p-2 bg-slate-700 rounded-lg border border-slate-600">
+                      <FileText size={20} className="text-slate-300" />
                     </div>
                     <div className="max-w-[200px]">
-                      <p className="text-sm font-bold text-slate-700 truncate">{file.name}</p>
-                      <p className="text-xs text-slate-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                      <p className="text-sm font-bold text-slate-200 truncate">{file.name}</p>
+                      <p className="text-xs text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                     </div>
                   </div>
                   <button 
                     onClick={handleUpload}
                     disabled={scanning}
-                    className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2"
+                    className="bg-gradient-to-r from-cyan-600 to-primary text-white px-4 py-2 rounded-lg text-sm font-bold hover:from-cyan-500 hover:to-primary-dark disabled:opacity-50 flex items-center gap-2"
                   >
                     {scanning ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} />}
                     {scanning ? 'Scanning...' : 'Scan Now'}
@@ -137,19 +137,19 @@ const DocumentUploadModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
           ) : (
             <div className="space-y-4 animate-fadeIn">
-              <div className="flex items-center gap-2 text-green-600 font-bold text-sm mb-2">
+              <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm mb-2">
                 <CheckCircle size={18} />
                 Scanning Complete! Please verify the details below.
               </div>
 
               {preview.confidence !== 'high' && (
-                <div className="p-3 bg-amber-50 border border-amber-200 text-amber-700 rounded-xl text-sm flex flex-col gap-1 mb-4 font-medium">
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl text-sm flex flex-col gap-1 mb-4 font-medium">
                   <div className="flex items-center gap-2">
-                    <AlertCircle size={16} className="text-amber-500" />
+                    <AlertCircle size={16} className="text-amber-400" />
                     <span>Please verify extracted total amount.</span>
                   </div>
                   {preview.sourceLine && (
-                    <p className="text-xs text-amber-600 mt-1 pl-6">
+                    <p className="text-xs text-amber-300 mt-1 pl-6">
                       Extracted from: <span className="italic">"{preview.sourceLine}"</span>
                     </p>
                   )}
@@ -158,17 +158,17 @@ const DocumentUploadModal = ({ isOpen, onClose, onSuccess }) => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Transaction Type</label>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Transaction Type</label>
                   <div className="flex gap-2">
                     <button 
                       onClick={() => setPreview(p => ({...p, type: 'income'}))}
-                      className={`flex-1 py-2 rounded-lg text-sm font-bold border transition-all ${preview.type === 'income' ? 'bg-secondary/10 border-secondary text-secondary' : 'bg-white border-slate-200 text-slate-400'}`}
+                      className={`flex-1 py-2 rounded-lg text-sm font-bold border transition-all ${preview.type === 'income' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-slate-800/50 border-slate-700 text-slate-400'}`}
                     >
                       Income
                     </button>
                     <button 
                       onClick={() => setPreview(p => ({...p, type: 'expense'}))}
-                      className={`flex-1 py-2 rounded-lg text-sm font-bold border transition-all ${preview.type === 'expense' ? 'bg-red-50 border-red-200 text-red-600' : 'bg-white border-slate-200 text-slate-400'}`}
+                      className={`flex-1 py-2 rounded-lg text-sm font-bold border transition-all ${preview.type === 'expense' ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-slate-800/50 border-slate-700 text-slate-400'}`}
                     >
                       Expense
                     </button>
@@ -176,47 +176,47 @@ const DocumentUploadModal = ({ isOpen, onClose, onSuccess }) => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Amount</label>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Amount</label>
                   <input 
                     type="number" 
                     name="amount"
                     value={preview.amount} 
                     onChange={handlePreviewChange}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Date</label>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Date</label>
                   <input 
                     type="date" 
                     name="date"
                     value={preview.date} 
                     onChange={handlePreviewChange}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Category / Source</label>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Category / Source</label>
                   <input 
                     type="text" 
                     name={preview.type === 'income' ? 'source' : 'category'}
                     value={preview.type === 'income' ? preview.source : preview.category} 
                     onChange={handlePreviewChange}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                     placeholder={preview.type === 'income' ? 'Employer/Client' : 'Category'}
                   />
                 </div>
 
                 <div className="col-span-2">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Notes</label>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Notes</label>
                   <textarea 
                     name="notes"
                     value={preview.notes} 
                     onChange={handlePreviewChange}
                     rows="2"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   />
                 </div>
               </div>
@@ -225,10 +225,10 @@ const DocumentUploadModal = ({ isOpen, onClose, onSuccess }) => {
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+        <div className="p-4 bg-slate-800/50 border-t border-slate-700/50 flex justify-end gap-3">
           <button 
             onClick={onClose}
-            className="px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-bold text-slate-400 hover:bg-slate-700 rounded-lg transition-colors"
           >
             Cancel
           </button>
@@ -236,7 +236,7 @@ const DocumentUploadModal = ({ isOpen, onClose, onSuccess }) => {
             <button 
               onClick={handleSave}
               disabled={saving}
-              className="bg-primary text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2"
+              className="bg-gradient-to-r from-cyan-600 to-primary text-white px-6 py-2 rounded-lg text-sm font-bold hover:from-cyan-500 hover:to-primary-dark disabled:opacity-50 flex items-center gap-2"
             >
               {saving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
               {saving ? 'Saving...' : 'Save Transaction'}

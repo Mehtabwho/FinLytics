@@ -327,7 +327,8 @@ const Income = () => {
       <DocumentUploadModal 
         isOpen={showOCRModal} 
         onClose={() => setShowOCRModal(false)} 
-        onSuccess={fetchIncomes}
+        onSuccess={() => { fetchIncomes(); triggerRefresh(); }}
+        financialYear={year}
       />
       </div>
     </PageTransition>

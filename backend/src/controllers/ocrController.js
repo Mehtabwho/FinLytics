@@ -270,7 +270,7 @@ const extractExpenseAmount = (rawText) => {
 };
 
 const saveEntry = async (req, res) => {
-  const { type, category, source, amount, date, notes } = req.body;
+  const { type, category, source, amount, date, notes, financialYear } = req.body;
 
   try {
     if (type === 'income') {
@@ -279,7 +279,8 @@ const saveEntry = async (req, res) => {
         source: source || 'OCR Upload',
         amount,
         date,
-        description: notes
+        description: notes,
+        financialYear
       });
       await income.save();
     } else {
@@ -289,7 +290,8 @@ const saveEntry = async (req, res) => {
         amount,
         date,
         description: notes,
-        isDeductible: true // Default to true
+        isDeductible: true, // Default to true
+        financialYear
       });
       await expense.save();
     }

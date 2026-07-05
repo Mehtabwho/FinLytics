@@ -348,7 +348,8 @@ const Expenses = () => {
       <DocumentUploadModal 
         isOpen={showOCRModal} 
         onClose={() => setShowOCRModal(false)} 
-        onSuccess={fetchExpenses}
+        onSuccess={() => { fetchExpenses(); triggerRefresh(); }}
+        financialYear={year}
       />
     </div>
     </PageTransition>

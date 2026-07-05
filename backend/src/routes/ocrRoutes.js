@@ -2,13 +2,17 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const os = require('os');
 const { scanDocument, saveEntry } = require('../controllers/ocrController');
 const { protect } = require('../middleware/authMiddleware');
+
+// Use /tmp directory on Render (or local temp dir) for temporary uploads
+const uploadsDir = os.tmpdir();
 
 // Multer configuration for temporary file storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);

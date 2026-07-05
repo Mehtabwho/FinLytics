@@ -182,7 +182,7 @@ const DocumentUploadModal = ({ isOpen, onClose, onSuccess, financialYear }) => {
                     name="amount"
                     value={preview.amount} 
                     onChange={handlePreviewChange}
-                    className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                    className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   />
                 </div>
 
@@ -193,7 +193,7 @@ const DocumentUploadModal = ({ isOpen, onClose, onSuccess, financialYear }) => {
                     name="date"
                     value={preview.date} 
                     onChange={handlePreviewChange}
-                    className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                    className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   />
                 </div>
 
@@ -204,7 +204,7 @@ const DocumentUploadModal = ({ isOpen, onClose, onSuccess, financialYear }) => {
                     name={preview.type === 'income' ? 'source' : 'category'}
                     value={preview.type === 'income' ? preview.source : preview.category} 
                     onChange={handlePreviewChange}
-                    className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                    className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                     placeholder={preview.type === 'income' ? 'Employer/Client' : 'Category'}
                   />
                 </div>
@@ -216,7 +216,7 @@ const DocumentUploadModal = ({ isOpen, onClose, onSuccess, financialYear }) => {
                     value={preview.notes} 
                     onChange={handlePreviewChange}
                     rows="2"
-                    className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                    className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                   />
                 </div>
               </div>
